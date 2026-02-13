@@ -1,0 +1,24 @@
+
+=== Correlation Summary ===
+              metric   N  Pearson r    p_value_r  Spearman rho  p_value_rho
+         stride_time 135   0.843090 1.206618e-37      0.940169 4.703003e-64
+         stance_time 154   0.852127 1.358981e-44      0.947156 5.966205e-77
+stride_length (norm) 135   0.588385 6.178715e-14      0.594496 2.920501e-14
+
+=== Bland-Altman Summary ===
+              metric   N          bias  LOA lower  LOA upper
+         stride_time 135 -5.654321e-03  -0.247642   0.236334
+         stance_time 154  8.005736e-02  -0.133792   0.293907
+stride_length (norm) 135 -1.842148e-16  -1.778348   1.778348
+
+=== ICC Summary ===
+              metric   N      ICC  95% CI lower  95% CI upper interpretation
+         stride_time 135 0.831936      0.771662      0.877405           good
+         stance_time 154 0.789931      0.477268      0.895540           good
+stride_length (norm) 135 0.590184      0.468012      0.690161       moderate
+
+=== Error Metrics Summary ===
+              metric   N     RMSE      MAE
+         stride_time 135 0.123135 0.062346
+         stance_time 154 0.135041 0.093627
+stride_length (norm) 135 0.903954 0.593967

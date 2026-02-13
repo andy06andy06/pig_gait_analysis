@@ -1,0 +1,196 @@
+{
+  "k": 2,
+  "inertia": 35.831720761904755,
+  "assignments": {
+    "1118004": 1,
+    "1118006": 1,
+    "1118008": 1,
+    "1118011": 1,
+    "1118013": 1,
+    "1118017": 1,
+    "1118020": 1,
+    "1118021": 1,
+    "1118023": 1,
+    "1118029": 1,
+    "1118030": 1,
+    "1118034": 1,
+    "1209038": 1,
+    "1209039": 1,
+    "1209043": 1,
+    "1209045": 1,
+    "1209047": 1,
+    "1209049": 1,
+    "1209052": 1,
+    "1209054": 1,
+    "1209055": 1,
+    "1209056": 1,
+    "1209059": 1,
+    "1209060": 1,
+    "1209061": 1,
+    "1209062": 1,
+    "1209063": 1,
+    "1209065": 1,
+    "1209066": 1,
+    "1209068": 0,
+    "1209073": 1,
+    "1209075": 1,
+    "1209076": 1,
+    "1209079": 0,
+    "1209080": 1,
+    "1209083": 1,
+    "1209085": 1,
+    "1209086": 1,
+    "1209087": 1,
+    "B0018": 1,
+    "B0026": 0,
+    "B0037": 0,
+    "B0038": 1,
+    "B0039": 1,
+    "B0045": 1,
+    "B0058": 0,
+    "B0059": 1,
+    "B0064": 1,
+    "B0067": 1,
+    "C0001": 1,
+    "C0002": 0,
+    "C0004": 1,
+    "C0006": 1,
+    "C0008": 1,
+    "C0009": 1,
+    "C0013": 1,
+    "C0014-seg1": 1,
+    "C0014-seg2": 1,
+    "C0014D": 1,
+    "C0015-seg1": 1,
+    "C0015-seg2": 0,
+    "C0015D": 1,
+    "C0016-seg1": 1,
+    "C0016-seg2": 1,
+    "C0017-seg1": 1,
+    "C0017-seg2": 1,
+    "C0017D": 0,
+    "C0019-seg1": 1,
+    "C0019-seg2": 1,
+    "C0019D": 1,
+    "C0020": 0,
+    "C0021-seg1": 1,
+    "C0021-seg2": 0,
+    "C0021D": 1,
+    "C0022-seg1": 1,
+    "C0022-seg2": 0,
+    "C0022D": 1,
+    "C0024-seg1": 0,
+    "C0024-seg2": 1,
+    "C0032-seg1": 0,
+    "C0032-seg2": 0,
+    "C0033-seg1-l": 1,
+    "C0033-seg1-s": 1,
+    "C0033-seg2-l": 1,
+    "C0033-seg2-s": 1,
+    "C0035": 1,
+    "C0038-seg1": 1,
+    "C0038-seg2": 1,
+    "C0040": 1
+  },
+  "centroids": [
+    [
+      0.972857142857143,
+      0.8207142857142857,
+      0.7578571428571428,
+      0.9235714285714284,
+      0.4992857142857143,
+      0.5507142857142857,
+      0.945,
+      0.105,
+      0.09857142857142856,
+      0.9249999999999999,
+      0.2671428571428572,
+      0.2857142857142857
+    ],
+    [
+      1.0013333333333332,
+      0.9986666666666666,
+      0.9881333333333331,
+      1.0088,
+      1.0070666666666668,
+      1.0001333333333333,
+      1.0354666666666665,
+      1.0184000000000002,
+      1.0022666666666669,
+      0.9955999999999998,
+      0.9737333333333333,
+      0.9755999999999997
+    ]
+  ],
+  "feature_names": [
+    "symmetry_ratio.Front / Hind.stance_time",
+    "symmetry_ratio.Front / Hind.stride_length",
+    "symmetry_ratio.Front / Hind.stride_time",
+    "symmetry_ratio.Left / Right.stance_time",
+    "symmetry_ratio.Left / Right.stride_length",
+    "symmetry_ratio.Left / Right.stride_time",
+    "symmetry_ratio.Left Front / Right Front.stance_time",
+    "symmetry_ratio.Left Front / Right Front.stride_length",
+    "symmetry_ratio.Left Front / Right Front.stride_time",
+    "symmetry_ratio.Left Hind / Right Hind.stance_time",
+    "symmetry_ratio.Left Hind / Right Hind.stride_length",
+    "symmetry_ratio.Left Hind / Right Hind.stride_time"
+  ],
+  "cluster_summaries": {
+    "0": [
+      {
+        "feature": "symmetry_ratio.Left Front / Right Front.stride_length",
+        "centroid_value": 0.105,
+        "deviation": -0.4567000000000001
+      },
+      {
+        "feature": "symmetry_ratio.Left Front / Right Front.stride_time",
+        "centroid_value": 0.09857142857142856,
+        "deviation": -0.45184761904761916
+      },
+      {
+        "feature": "symmetry_ratio.Left Hind / Right Hind.stride_length",
+        "centroid_value": 0.2671428571428572,
+        "deviation": -0.35329523809523805
+      },
+      {
+        "feature": "symmetry_ratio.Left Hind / Right Hind.stride_time",
+        "centroid_value": 0.2857142857142857,
+        "deviation": -0.344942857142857
+      },
+      {
+        "feature": "symmetry_ratio.Left / Right.stride_length",
+        "centroid_value": 0.4992857142857143,
+        "deviation": -0.2538904761904763
+      }
+    ],
+    "1": [
+      {
+        "feature": "symmetry_ratio.Left Front / Right Front.stride_length",
+        "centroid_value": 1.0184000000000002,
+        "deviation": 0.4567000000000001
+      },
+      {
+        "feature": "symmetry_ratio.Left Front / Right Front.stride_time",
+        "centroid_value": 1.0022666666666669,
+        "deviation": 0.45184761904761916
+      },
+      {
+        "feature": "symmetry_ratio.Left Hind / Right Hind.stride_length",
+        "centroid_value": 0.9737333333333333,
+        "deviation": 0.3532952380952381
+      },
+      {
+        "feature": "symmetry_ratio.Left Hind / Right Hind.stride_time",
+        "centroid_value": 0.9755999999999997,
+        "deviation": 0.344942857142857
+      },
+      {
+        "feature": "symmetry_ratio.Left / Right.stride_length",
+        "centroid_value": 1.0070666666666668,
+        "deviation": 0.2538904761904762
+      }
+    ]
+  },
+  "aggregator": "aggregate_sequence"
+}

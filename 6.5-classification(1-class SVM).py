@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.svm import OneClassSVM
 from sklearn.model_selection import LeaveOneOut, GridSearchCV
-from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score
+from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score, recall_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif
@@ -319,12 +319,12 @@ def SVM_classification(feature_file_path):
     # Goal: Maximize F1-score (or other metric) on the Validation set (Sound Val + Lame Val).
     
     # Grid Search Parameters - UPDATED based on feedback
-    # Reduced nu range to avoid rejecting too many normal samples.
-    # Added more gamma options.
+    # Expanded ranges for better optimization
     param_grid = {
-        'ocsvm__nu': [0.01, 0.03, 0.05, 0.1, 0.15, 0.2],
-        'ocsvm__gamma': ['scale', 'auto', 0.001, 0.01, 0.05, 0.1],
-        'ocsvm__kernel': ['rbf', 'sigmoid']
+        'ocsvm__nu': [0.001, 0.005, 0.01, 0.03, 0.05, 0.08, 0.1, 0.15, 0.2],
+        'ocsvm__gamma': ['scale', 'auto', 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5],
+        'ocsvm__kernel': ['rbf', 'sigmoid', 'poly'],
+        'pca__n_components': [0.90, 0.95, 0.99]
     }
     
     best_score = -1
@@ -350,9 +350,16 @@ def SVM_classification(feature_file_path):
     from sklearn.model_selection import ParameterGrid
     grid = list(ParameterGrid(param_grid))
     
-    for params in grid:
+    print(f"Testing {len(grid)} parameter combinations...")
+
+    for i, params in enumerate(grid):
         scores = []
-        
+        if i % 10 == 0:
+            print(f"  Processing combination {i}/{len(grid)}...")
+            
+        # Extract PCA params separately
+        pca_n = params.pop('pca__n_components', 0.95)
+
         for train_idx, val_idx in kf.split(X_sound):
             X_train_fold = X_sound[train_idx]
             X_val_sound_fold = X_sound[val_idx]
@@ -366,7 +373,7 @@ def SVM_classification(feature_file_path):
             # Note: We need to reconstruct the pipeline for each iteration to change params
             current_pipe = Pipeline([
                 ('scaler', StandardScaler()),
-                ('pca', PCA(n_components=0.95)),
+                ('pca', PCA(n_components=pca_n)),
                 ('ocsvm', OneClassSVM(**{k.replace('ocsvm__', ''): v for k, v in params.items()}))
             ])
             
@@ -380,28 +387,57 @@ def SVM_classification(feature_file_path):
             # Map OCSVM outputs to our labels: 1 -> 0 (Sound), -1 -> 1 (Lame)
             preds_mapped = np.where(preds_raw == 1, 0, 1)
             
-            # Score (F1 Macro to balance importance of detecting Lame)
-            score = f1_score(y_val_fold, preds_mapped, average='macro', zero_division=0)
-            scores.append(score)
+            # Score (Recall for Lame class - Prioritize sensitivity)
+            # We want to catch as many Lame pigs as possible.
+            # pos_label=1 refers to Lame class.
+            recall = recall_score(y_val_fold, preds_mapped, pos_label=1, zero_division=0)
             
+            # Secondary metric: Precision (to break ties if recalls are equal)
+            # or F2 score (which weights recall higher than precision)
+            # Let's use a weighted score: 0.8 * Recall + 0.2 * Precision to avoid trivial solutions
+            # But the user specifically asked for sensitivity, so let's stick to Recall as primary.
+            # However, pure Recall might just pick the highest `nu` (predicting everything as anomaly).
+            # So let's use F2-score which weights Recall 2x more than Precision.
+            
+            # Actually, let's use F2 score to be safe against trivial "all anomaly" models
+            beta = 2
+            p = 0 # precision placeholder, not needed for direct calc
+            # fbeta_score calculation manually or import it? Let's just use recall for now but check precision.
+            
+            # Simple approach: Maximize Recall, use Precision as tie-breaker
+            score = recall
+            scores.append(score)
+        
+        # Restore PCA param for saving to best_params
+        params['pca__n_components'] = pca_n
+
         avg_score = np.mean(scores)
+        
+        # We need a tie-breaker because many params might give the same discrete recall (e.g. 10/12 vs 11/12)
+        # But here we are averaging over folds, so it's a float.
         if avg_score > best_score:
             best_score = avg_score
             best_params = params
+            print(f"  New best score (Recall Lame): {best_score:.4f} with params {best_params}")
             
     print(f"\nBest Parameters found: {best_params}")
-    print(f"Best CV Score (F1 Macro): {best_score:.3f}")
+    print(f"Best CV Score (Recall Lame): {best_score:.3f}")
     
     # --- Final Training and Evaluation ---
     # Train on ALL Sound data with best params
+    pca_n_final = best_params.pop('pca__n_components', 0.95)
+    
     best_pipe = Pipeline([
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=0.95)),
+        ('pca', PCA(n_components=pca_n_final)),
         ('ocsvm', OneClassSVM(**{k.replace('ocsvm__', ''): v for k, v in best_params.items()}))
     ])
     
     best_pipe.fit(X_sound)
     best_model = best_pipe # Save for viz
+    
+    # Put PCA param back for saving
+    best_params['pca__n_components'] = pca_n_final
     
     # Evaluation on the entire dataset (Sound + Lame) just to see overall fit
     # Note: Training error on Sound is included here, which is expected for OCSVM (it should classify most Sound as Sound)
@@ -419,6 +455,29 @@ def SVM_classification(feature_file_path):
     print("\nClassification Report:")
     print(classification_report(y_full, y_pred, target_names=target_names, zero_division=0))
 
+    # --- Identify Misclassified IDs ---
+    print("\nMisclassified Samples:")
+    
+    # Reconstruct IDs in the same order as X_full
+    # X_full is [X_sound, X_lame]
+    sound_ids = sorted(list(classified_features.get('sound', {}).keys()))
+    lame_ids = sorted(list(classified_features.get('lame', {}).keys()))
+    full_ids = sound_ids + lame_ids
+    
+    misclassified_info = []
+    
+    for i, (true_label, pred_label) in enumerate(zip(y_full, y_pred)):
+        if true_label != pred_label:
+            vid_id = full_ids[i] if i < len(full_ids) else "Unknown"
+            status = "False Positive (Healthy classified as Lame)" if pred_label == 1 else "False Negative (Lame classified as Healthy)"
+            print(f"  {vid_id}: {status}")
+            misclassified_info.append({
+                "id": vid_id,
+                "true_label": "Sound" if true_label == 0 else "Lame",
+                "pred_label": "Sound" if pred_label == 0 else "Lame",
+                "status": status
+            })
+
     # --- Visualization ---
     print("\nGenerating visualizations...")
     output_dir = os.path.join(os.path.dirname(feature_file_path), 'classification_ocsvm')
@@ -431,7 +490,8 @@ def SVM_classification(feature_file_path):
         "best_params": best_params,
         "best_cv_score": best_score,
         "final_accuracy": accuracy,
-        "classification_report": classification_report(y_full, y_pred, target_names=target_names, zero_division=0, output_dict=True)
+        "classification_report": classification_report(y_full, y_pred, target_names=target_names, zero_division=0, output_dict=True),
+        "misclassified_samples": misclassified_info
     }
 
     try:

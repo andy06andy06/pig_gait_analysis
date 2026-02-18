@@ -1,36 +1,153 @@
 {
     "best_params": {
-        "ocsvm__gamma": 0.05,
+        "ocsvm__gamma": 0.5,
         "ocsvm__kernel": "rbf",
-        "ocsvm__nu": 0.01
+        "ocsvm__nu": 0.001,
+        "pca__n_components": 0.9
     },
-    "best_cv_score": 0.636321048045186,
-    "final_accuracy": 0.7303370786516854,
+    "best_cv_score": 1.0,
+    "final_accuracy": 0.7865168539325843,
     "classification_report": {
         "Sound": {
-            "precision": 0.9649122807017544,
-            "recall": 0.7142857142857143,
-            "f1-score": 0.8208955223880597,
+            "precision": 1.0,
+            "recall": 0.7532467532467533,
+            "f1-score": 0.8592592592592593,
             "support": 77.0
         },
         "Lame": {
-            "precision": 0.3125,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.45454545454545453,
+            "precision": 0.3870967741935484,
+            "recall": 1.0,
+            "f1-score": 0.5581395348837209,
             "support": 12.0
         },
-        "accuracy": 0.7303370786516854,
+        "accuracy": 0.7865168539325843,
         "macro avg": {
-            "precision": 0.6387061403508771,
-            "recall": 0.7738095238095238,
-            "f1-score": 0.6377204884667571,
+            "precision": 0.6935483870967742,
+            "recall": 0.8766233766233766,
+            "f1-score": 0.7086993970714901,
             "support": 89.0
         },
         "weighted avg": {
-            "precision": 0.8769465799329784,
-            "recall": 0.7303370786516854,
-            "f1-score": 0.7715000076227647,
+            "precision": 0.9173613628126133,
+            "recall": 0.7865168539325843,
+            "f1-score": 0.8186588469839058,
             "support": 89.0
         }
-    }
+    },
+    "misclassified_samples": [
+        {
+            "id": "1209063",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "1209068",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "1209073",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "1209080",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "B0018",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "B0037",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "B0045",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "B0059",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0009",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0013",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0014-seg1",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0014-seg2",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0015-seg2",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0016-seg1",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0017-seg2",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0019-seg1",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0019-seg2",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0021-seg1",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        },
+        {
+            "id": "C0032-seg2",
+            "true_label": "Sound",
+            "pred_label": "Lame",
+            "status": "False Positive (Healthy classified as Lame)"
+        }
+    ]
 }

@@ -13,7 +13,8 @@ root/
 │   ├── *.mp4                      # Original video files
 │   ├── *_pressuremat.json         # (Optional) Ground truth pressure mat data
 │   ├── plots/                     # OUTPUT: Trajectory visualization
-│   └── keyframe_image/            # OUTPUT: Keyframe snapshots with overlays
+│   ├── keyframe_image/            # OUTPUT: Keyframe snapshots with overlays
+│   └── classified_video/          # OUTPUT: Organized videos by classification (Sound/Lame)
 │
 └── code/                          # SCRIPTS
     ├── 1-positioning.py
@@ -22,6 +23,8 @@ root/
     ├── 4-pressuremat_vs_video.py
     ├── 5-feature_analysis.py
     ├── 6-classification.py
+    ├── 6.5-classification(1-class SVM).py
+    ├── 7-lame_sound_analysis.py
     ├── u-convert_pressuremat.py
     ├── u-loss_per_keypoint.py
     └── *.json                     # Intermediate data files are generated here
@@ -39,7 +42,8 @@ Run the scripts in the numerical order below to process raw DLC data into analyz
 
   * **Purpose:** Cleans DLC trajectories by removing outliers, filling gaps, and detecting stance/swing phases based on hoof velocity.
   * **Input:** `../videos/*.h5`
-  * **Output:** \* `1-keyframes_starts_only.json`: Frame indices where key events (hoof strikes) occur.
+  * **Output:** 
+      * `1-keyframes_starts_only.json`: Frame indices where key events (hoof strikes) occur.
       * `1-keyframes_segments.json`: Detailed segment data (start/end frames, duration).
       * `../videos/plots/`: X-coordinate trajectory plots vs. detected phases.
 
@@ -47,7 +51,8 @@ Run the scripts in the numerical order below to process raw DLC data into analyz
 
   * **Purpose:** Extracts coordinate data and likelihoods specifically at the detected keyframes. Determines walking direction (Left/Right) and exports visualization images.
   * **Input:** `1-keyframes_starts_only.json`, `.h5` files, `.mp4` files.
-  * **Output:** \* `2-keyframe_coords.json`: Structured coordinates for every keyframe.
+  * **Output:** 
+      * `2-keyframe_coords.json`: Structured coordinates for every keyframe.
       * `../videos/keyframe_image/`: Cropped images of the pigs with skeleton overlays.
 
 ### Phase 2: Feature Engineering
@@ -61,7 +66,7 @@ Run the scripts in the numerical order below to process raw DLC data into analyz
       * **Angular:** Hoof release angles ($\alpha_1, \alpha_2$), Back/Neck angles ($\beta_1, \beta_2$).
       * **Symmetry:** Ratios (Left/Right, Front/Hind).
   * **Input:** `2-keyframe_coords.json`, `1-keyframes_starts_only.json`.
-  * **Output:** `3-keyframe_feature.json` (The master dataset).
+  * **Output:** `3-keyframe_features.json` (The master dataset).
 
 ### Phase 3: Analysis & Machine Learning
 
@@ -69,18 +74,40 @@ Run the scripts in the numerical order below to process raw DLC data into analyz
 
   * **Purpose:** Performs unsupervised analysis to find patterns in the gait data.
   * **Methods:** Z-score standardization, K-Means clustering, PCA/t-SNE projection, and Pearson correlation matrices.
-  * **Input:** `3-keyframe_feature.json`.
-  * **Output:** \* `3-standardized_keyframe_features.json`
+  * **Input:** `3-keyframe_features.json`.
+  * **Output:** 
+      * `3-standardized_keyframe_features.json`
       * `5-kmeans_clusters.json`
       * `feature_analysis/`: Contains Correlation matrices, Cluster visualizations (PCA/t-SNE), and Feature deviation bar charts.
 
 **5. `6-classification.py`**
 
-  * **Purpose:** Performs supervised classification to detect "Lame" vs. "Sound" pigs.
-  * **Methods:** Support Vector Machine (SVM) with RBF kernel using Leave-One-Out Cross-Validation (LOOCV).
-  * **Input:** `gait_features.json` (ensure this matches the output from step 3 or is renamed).
-  * **Output:** \* `classification/svm_confusion_matrix.png`
-      * Console report: Accuracy score and Classification report.
+  * **Purpose:** Performs supervised classification to detect "Lame" vs. "Sound" pigs using standard SVM.
+  * **Methods:** Support Vector Machine (SVM) with Grid Search and Leave-One-Out Cross-Validation.
+  * **Input:** `3-keyframe_features.json`.
+  * **Output:** 
+      * `6-classified_gait_features.json`: Separated features for Sound and Lame groups.
+      * `classification/`: Contains Confusion Matrix, 2D Decision Boundary plots, and Grid Search results.
+      * `../videos/classified_video/`: Organized `.h5` files.
+
+**6. `6.5-classification(1-class SVM).py`**
+
+  * **Purpose:** Performs anomaly detection to identify "Lame" pigs as outliers from the "Sound" population.
+  * **Methods:** One-Class SVM (OCSVM) with RBF kernel, PCA dimensionality reduction, and hyperparameter tuning maximizing F-score/Recall.
+  * **Input:** `3-keyframe_features.json` (via `6-classified_gait_features.json` generation/update).
+  * **Output:** 
+      * `6-classified_gait_features.json`: (Updated/Generated) Separated features.
+      * `classification_ocsvm/`: Contains Confusion Matrix, 2D Decision Boundary plots, and evaluation results.
+      * `../videos/classified_video/`: Organized `.h5` files.
+
+**7. `7-lame_sound_analysis.py`**
+
+  * **Purpose:** Performs statistical analysis to compare gait features between "Lame" and "Sound" groups.
+  * **Methods:** Mann-Whitney U test for statistical significance, Boxplots with strip plots for visualization.
+  * **Input:** `6-classified_gait_features.json`.
+  * **Output:** 
+      * `lame_sound_feature_analysis.csv`: Summary of statistical tests (p-values, means).
+      * `lame_sound_analysis_plots/`: Boxplots for each feature showing distribution and significance levels.
 
 -----
 
@@ -98,8 +125,9 @@ Use these scripts to validate video-derived metrics against ground-truth pressur
 
   * **Purpose:** Matches video trials with pressure mat trials to quantify accuracy.
   * **Statistics:** Pearson/Spearman correlation, Bland-Altman agreement (Bias & Limits of Agreement), and ICC(2,1).
-  * **Input:** `3-keyframe_feature.json` and `*_pressuremat.json`.
-  * **Output:** \* `pressuremat_vs_video/`: Scatter plots, Bland-Altman plots, and `validation_summary.txt`.
+  * **Input:** `3-keyframe_features.json` and `*_pressuremat.json`.
+  * **Output:** 
+      * `pressuremat_vs_video/`: Scatter plots, Bland-Altman plots, and `validation_summary.txt`.
 
 -----
 

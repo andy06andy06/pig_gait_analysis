@@ -392,10 +392,28 @@ def SVM_classification(feature_file_path):
     
     # 1. Confusion Matrix
     try:
-        cm_display = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, display_labels=target_names, cmap=plt.cm.Blues)
+        fig, ax = plt.subplots(figsize=(8, 6))
+        cm_display = ConfusionMatrixDisplay.from_predictions(
+            y_true,
+            y_pred,
+            display_labels=target_names,
+            cmap=plt.cm.Blues,
+            ax=ax
+        )
+
+        cm_display.ax_.set_title(f"SVM Best Model Confusion Matrix\nAcc: {accuracy:.2f}", fontsize=16, fontweight='bold')
+        cm_display.ax_.set_xlabel("Predicted label", fontsize=13)
+        cm_display.ax_.set_ylabel("True label", fontsize=13)
+        cm_display.ax_.tick_params(axis='both', labelsize=12)
+
+        # Enlarge values inside each confusion-matrix cell
+        if hasattr(cm_display, 'text_') and cm_display.text_ is not None:
+            for txt in cm_display.text_.ravel():
+                txt.set_fontsize(13)
+                txt.set_fontweight('bold')
+
         cm_path = os.path.join(output_dir, 'svm_confusion_matrix.png')
-        plt.title(f"SVM Best Model Confusion Matrix\nAcc: {accuracy:.2f}")
-        plt.savefig(cm_path)
+        plt.savefig(cm_path, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"Confusion Matrix saved to {cm_path}")
     except Exception as e:

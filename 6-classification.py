@@ -6,6 +6,7 @@ import re
 from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from sklearn.svm import SVC
 from sklearn.model_selection import LeaveOneOut, GridSearchCV
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score
@@ -232,23 +233,44 @@ def visualize_2d_decision_boundary(X, y, best_model, output_dir):
         Z = Z.reshape(xx.shape)
         
         # Put the result into a color plot
-        plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.3)
+        plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.22)
         
         # Plot the training points
-        scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap=plt.cm.coolwarm, edgecolors='k', s=80)
+        plt.scatter(
+            X_pca[:, 0], X_pca[:, 1], c=y, cmap=plt.cm.coolwarm,
+            edgecolors='k', linewidths=1.1, s=170, alpha=0.95
+        )
         
         # Labeling
-        plt.xlabel(f'PCA Component 1 ({pca.explained_variance_ratio_[0]:.2%} var)')
-        plt.ylabel(f'PCA Component 2 ({pca.explained_variance_ratio_[1]:.2%} var)')
-        plt.title('SVM Decision Boundary in 2D PCA Space')
+        plt.xlabel(f'PCA Component 1 ({pca.explained_variance_ratio_[0]:.2%} var)', fontsize=13)
+        plt.ylabel(f'PCA Component 2 ({pca.explained_variance_ratio_[1]:.2%} var)', fontsize=13)
+        plt.title('SVM Decision Boundary in 2D PCA Space', fontsize=15)
+        plt.xticks(fontsize=11)
+        plt.yticks(fontsize=11)
         
         # Legend
-        handles, labels = scatter.legend_elements()
-        plt.legend(handles, ['Sound', 'Lame'], loc="upper right", title="Classes")
+        legend_handles = [
+            Line2D([0], [0], marker='o', color='w', label='Sound',
+                   markerfacecolor=plt.cm.coolwarm(0.0), markeredgecolor='k',
+                   markeredgewidth=1.1, markersize=12),
+            Line2D([0], [0], marker='o', color='w', label='Lame',
+                   markerfacecolor=plt.cm.coolwarm(1.0), markeredgecolor='k',
+                   markeredgewidth=1.1, markersize=12),
+        ]
+        plt.legend(
+            handles=legend_handles,
+            loc="upper right",
+            title="Classes",
+            fontsize=12,
+            title_fontsize=13,
+            framealpha=0.95,
+            borderpad=0.8,
+            labelspacing=0.6
+        )
         
         # Save
         save_path = os.path.join(output_dir, 'svm_decision_boundary_2d.png')
-        plt.savefig(save_path)
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"2D Visualization saved to {save_path}")
         

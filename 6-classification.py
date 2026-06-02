@@ -16,6 +16,67 @@ from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import StratifiedKFold
 from sklearn.decomposition import PCA
 
+LAME_LEVEL_CLASSES = ["level1_sound", "level2_medium", "level3_lame"]
+
+def parse_video_id_from_h5(file_name):
+    """Extract the video/pressuremat id before the DLC suffix in a DLC h5 filename."""
+    base_name = os.path.basename(file_name)
+    if "DLC_" in base_name:
+        return base_name.split("DLC_", 1)[0]
+    return os.path.splitext(base_name)[0]
+
+def find_existing_feature_file(base_dir):
+    """Prefer standardized keyframe features, then fall back to available feature JSON files."""
+    candidates = [
+        os.path.join(base_dir, '3-standardized_keyframe_features.json'),
+        os.path.join(base_dir, '3-gait_features.json'),
+        os.path.join(base_dir, '3-keyframe_features.json'),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    raise FileNotFoundError("No feature JSON found. Tried: " + ", ".join(candidates))
+
+def load_lame_level_ids_from_dataset(classified_dir):
+    """Load class -> ids mapping by scanning videos/classified_video_new level folders."""
+    class_ids = {}
+    for class_name in LAME_LEVEL_CLASSES:
+        class_dir = os.path.join(classified_dir, class_name)
+        h5_files = sorted(glob.glob(os.path.join(class_dir, "*.h5")))
+        ids = [parse_video_id_from_h5(path) for path in h5_files]
+        class_ids[class_name] = ids
+        print(f"Loaded {len(ids)} ids from {class_dir}")
+    return class_ids
+
+def extract_features_multiclass(class_ids, input_path, output_path):
+    """Extract feature records for arbitrary class folders into a classified JSON."""
+    print(f"Reading features from {input_path}...")
+    with open(input_path, 'r') as f:
+        data = json.load(f)
+
+    classified_data = {class_name: {} for class_name in class_ids}
+    missing = []
+
+    for class_name, ids in class_ids.items():
+        print(f"Extracting features for {class_name}...")
+        for vid in ids:
+            key = find_key_robust(vid, data)
+            if key:
+                classified_data[class_name][vid] = data[key]
+                print(f"  Found features for {vid}")
+            else:
+                missing.append((class_name, vid))
+                print(f"  Warning: Features for {vid} not found in input JSON.")
+
+    if missing:
+        print(f"Warning: {len(missing)} ids were missing feature records.")
+
+    print(f"Saving classified features to {output_path}...")
+    with open(output_path, 'w') as f:
+        json.dump(classified_data, f, indent=4)
+    print("Multi-class feature extraction complete.")
+    return classified_data
+
 def determine_consistent_shuffle(ids, source_dir):
     shuffle_counts = Counter()
     shuffle_pattern = re.compile(r'(shuffle\d+)')
@@ -142,21 +203,23 @@ def get_features_from_dict(d, prefix=''):
             features[f"{prefix}{k}"] = v
     return features
 
-def prepare_dataset(classified_features):
+def prepare_dataset(classified_features, class_names=None):
     X = []
     y = []
-    
-    # Process Lame (label 1)
-    for vid, data in classified_features.get('lame', {}).items():
-        feats = get_features_from_dict(data)
-        X.append(feats)
-        y.append(1)
-        
-    # Process Sound (label 0)
-    for vid, data in classified_features.get('sound', {}).items():
-        feats = get_features_from_dict(data)
-        X.append(feats)
-        y.append(0)
+
+    if class_names is None:
+        if all(class_name in classified_features for class_name in LAME_LEVEL_CLASSES):
+            class_names = LAME_LEVEL_CLASSES
+        else:
+            # Backward-compatible binary default for older classified feature JSON files.
+            class_names = ['sound', 'lame']
+
+    # Process arbitrary classes in a stable label order.
+    for label, class_name in enumerate(class_names):
+        for vid, data in classified_features.get(class_name, {}).items():
+            feats = get_features_from_dict(data)
+            X.append(feats)
+            y.append(label)
         
     # Vectorize
     # Collect all keys to ensure consistent order
@@ -177,7 +240,7 @@ def prepare_dataset(classified_features):
         
     return X_vec, np.array(y), all_keys
 
-def visualize_2d_decision_boundary(X, y, best_model, output_dir):
+def visualize_2d_decision_boundary(X, y, best_model, output_dir, target_names=None):
     print("\nGenerating 2D Decision Boundary visualization...")
     try:
         # 1. Transform data using the best pipeline's preprocessing steps (Scaler + Selection)
@@ -249,13 +312,14 @@ def visualize_2d_decision_boundary(X, y, best_model, output_dir):
         plt.yticks(fontsize=11)
         
         # Legend
+        if target_names is None:
+            target_names = [str(label) for label in sorted(np.unique(y))]
+        cmap = plt.cm.get_cmap('coolwarm', len(target_names))
         legend_handles = [
-            Line2D([0], [0], marker='o', color='w', label='Sound',
-                   markerfacecolor=plt.cm.coolwarm(0.0), markeredgecolor='k',
-                   markeredgewidth=1.1, markersize=12),
-            Line2D([0], [0], marker='o', color='w', label='Lame',
-                   markerfacecolor=plt.cm.coolwarm(1.0), markeredgecolor='k',
-                   markeredgewidth=1.1, markersize=12),
+            Line2D([0], [0], marker='o', color='w', label=class_name,
+                   markerfacecolor=cmap(i), markeredgecolor='k',
+                   markeredgewidth=1.1, markersize=12)
+            for i, class_name in enumerate(target_names)
         ]
         plt.legend(
             handles=legend_handles,
@@ -279,7 +343,7 @@ def visualize_2d_decision_boundary(X, y, best_model, output_dir):
         import traceback
         traceback.print_exc()
 
-def SVM_classification(feature_file_path):
+def SVM_classification(feature_file_path, target_names=None, output_subdir='classification'):
     print(f"Loading features from {feature_file_path}...")
     try:
         with open(feature_file_path, 'r') as f:
@@ -288,14 +352,20 @@ def SVM_classification(feature_file_path):
         print(f"Error: {feature_file_path} not found.")
         return 0.0
 
-    X, y, feature_names = prepare_dataset(classified_features)
+    if target_names is None:
+        target_names = list(classified_features.keys())
+
+    X, y, feature_names = prepare_dataset(classified_features, target_names)
     
     if len(X) == 0:
         print("Error: No data found to classify.")
         return 0.0
 
     print(f"Dataset shape: {X.shape}")
-    print(f"Classes: {np.unique(y)} (0=Sound, 1=Lame)")
+    print(f"Classes: {np.unique(y)}")
+    print("Class mapping:")
+    for label, class_name in enumerate(target_names):
+        print(f"  {label}={class_name} ({int(np.sum(y == label))} samples)")
     
     # Define pipeline
     pipe = Pipeline([
@@ -310,7 +380,7 @@ def SVM_classification(feature_file_path):
         'svm__C': [0.1, 1, 10, 100],
         'svm__gamma': ['scale', 'auto', 0.1, 0.01],
         'svm__kernel': ['rbf', 'linear', 'poly'],
-        'svm__class_weight': ['balanced', {0: 1, 1: 3}, {0: 1, 1: 5}, {0: 1, 1: 10}]
+        'svm__class_weight': [None, 'balanced']
     }
 
     # Cross-validation strategy
@@ -357,13 +427,12 @@ def SVM_classification(feature_file_path):
     print(f"\nFinal Model Performance (Best Params LOO):")
     print(f"Accuracy: {accuracy:.2f}")
     
-    target_names = ['Sound', 'Lame']
     print("\nClassification Report:")
-    print(classification_report(y_true, y_pred, target_names=target_names, zero_division=0))
+    print(classification_report(y_true, y_pred, labels=list(range(len(target_names))), target_names=target_names, zero_division=0))
 
     # --- Visualization ---
     print("\nGenerating visualizations...")
-    output_dir = os.path.join(os.path.dirname(feature_file_path), 'classification')
+    output_dir = os.path.join(os.path.dirname(feature_file_path), output_subdir)
     os.makedirs(output_dir, exist_ok=True)
 
     # Save GridSearch results
@@ -374,7 +443,9 @@ def SVM_classification(feature_file_path):
         "best_cv_score": grid_search.best_score_,
         "selected_features": selected_features,
         "final_accuracy": accuracy,
-        "classification_report": classification_report(y_true, y_pred, target_names=target_names, zero_division=0, output_dict=True)
+        "target_names": target_names,
+        "class_counts": {class_name: int(np.sum(y == i)) for i, class_name in enumerate(target_names)},
+        "classification_report": classification_report(y_true, y_pred, labels=list(range(len(target_names))), target_names=target_names, zero_division=0, output_dict=True)
     }
 
     def default_converter(o):
@@ -396,6 +467,7 @@ def SVM_classification(feature_file_path):
         cm_display = ConfusionMatrixDisplay.from_predictions(
             y_true,
             y_pred,
+            labels=list(range(len(target_names))),
             display_labels=target_names,
             cmap=plt.cm.Blues,
             ax=ax
@@ -420,7 +492,7 @@ def SVM_classification(feature_file_path):
         print(f"Error generating confusion matrix: {e}")
 
     # 2. 2D Decision Boundary
-    visualize_2d_decision_boundary(X, y, best_model, output_dir)
+    visualize_2d_decision_boundary(X, y, best_model, output_dir, target_names)
     
     return accuracy
 
@@ -473,8 +545,32 @@ def classified_file_operation():
     print("\n--- Step 3: SVM Classification ---")
     SVM_classification(output_features_path)
 
+def lame_level_classification_operation():
+    """Run 3-class SVM classification using videos/classified_video_new."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    videos_dir = os.path.join(base_dir, '../videos')
+    classified_dir = os.path.join(videos_dir, 'classified_video_new')
+
+    print("--- Step 1: Loading classified_video_new IDs ---")
+    class_ids = load_lame_level_ids_from_dataset(classified_dir)
+    total_ids = sum(len(ids) for ids in class_ids.values())
+    if total_ids == 0:
+        raise RuntimeError(f"No h5 files found in {classified_dir}")
+
+    print("\n--- Step 2: Extracting features for lame levels ---")
+    feature_file_path = find_existing_feature_file(base_dir)
+    output_features_path = os.path.join(base_dir, '6-classified_lame_level_features.json')
+    extract_features_multiclass(class_ids, feature_file_path, output_features_path)
+
+    print("\n--- Step 3: 3-class SVM Classification ---")
+    SVM_classification(
+        output_features_path,
+        target_names=LAME_LEVEL_CLASSES,
+        output_subdir='classification_lame_level',
+    )
+
 def main():
-    classified_file_operation()
+    lame_level_classification_operation()
 
 if __name__ == "__main__":
     main()

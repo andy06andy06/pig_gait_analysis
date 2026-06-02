@@ -1,0 +1,61 @@
+{
+    "best_params": {
+        "select__k": 5,
+        "svm__C": 1,
+        "svm__class_weight": "balanced",
+        "svm__gamma": 0.01,
+        "svm__kernel": "poly"
+    },
+    "best_cv_score": 1.0,
+    "selected_features": [
+        "back_height_feature_H_values_mean",
+        "back_neck_angle_beta2_values_mean",
+        "front_hoof_release_angle_alpha2_values_std",
+        "hind_hoof_release_angle_alpha2_values_std",
+        "symmetry_ratio_Front / Hind_stride_time"
+    ],
+    "final_accuracy": 1.0,
+    "target_names": [
+        "level1_sound",
+        "level2_medium",
+        "level3_lame"
+    ],
+    "class_counts": {
+        "level1_sound": 13,
+        "level2_medium": 16,
+        "level3_lame": 10
+    },
+    "classification_report": {
+        "level1_sound": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 13.0
+        },
+        "level2_medium": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 16.0
+        },
+        "level3_lame": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 10.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 39.0
+        },
+        "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 39.0
+        }
+    }
+}

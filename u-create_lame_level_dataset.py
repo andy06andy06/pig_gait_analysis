@@ -2,15 +2,15 @@
 """Create a 3-level lame dataset from pressure-mat symmetry tables.
 
 This script reads ``videos/*_pressuremat.json`` files, computes the worst
-asymmetry score from the ``Front / Hind`` and ``Left / Right`` sections in each
-symmetry table, and copies the matching DeepLabCut ``shuffle10`` h5 file into a
-new classified dataset folder.
+same-limb-pair left/right asymmetry score from the ``Left Front / Right Front``
+and ``Left Hind / Right Hind`` sections in each symmetry table, and copies the
+matching DeepLabCut ``shuffle10`` h5 file into a new classified dataset folder.
 
-Default thresholds are intentionally chosen to make level1 larger than the
-stricter first draft:
+Default thresholds follow the animal-science interpretation that lameness should
+be defined by excessive left/right imbalance within the front pair or hind pair:
 
-    level1_sound:  worst_asymmetry < 1.35
-    level2_medium: 1.35 <= worst_asymmetry < 1.60
+    level1_sound:  worst_asymmetry < 1.30
+    level2_medium: 1.30 <= worst_asymmetry < 1.60
     level3_lame:   worst_asymmetry >= 1.60
 
 The asymmetry score treats ratios above and below 1 symmetrically:
@@ -30,9 +30,10 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
-DEFAULT_LEVEL1_MAX = 1.35
-DEFAULT_LEVEL3_MIN = 1.60
-SYMMETRY_SECTIONS = ("Front / Hind", "Left / Right")
+DEFAULT_LEVEL1_MAX = 1.41
+DEFAULT_LEVEL3_MIN = 1.48
+SYMMETRY_SECTIONS = ("Left Front / Right Front", "Left Hind / Right Hind")
+SYMMETRY_METRICS = ("Max Force",)
 
 
 def asymmetry_score(value: float) -> Optional[float]:
@@ -49,7 +50,8 @@ def iter_symmetry_values(data: Dict[str, Any]) -> Iterable[Tuple[str, str, float
         metrics = sections.get(section_name, {})
         if not isinstance(metrics, dict):
             continue
-        for metric_name, raw_value in metrics.items():
+        for metric_name in SYMMETRY_METRICS:
+            raw_value = metrics.get(metric_name)
             if not isinstance(raw_value, (int, float)):
                 continue
             score = asymmetry_score(float(raw_value))
@@ -65,6 +67,16 @@ def classify(score: float, level1_max: float, level3_min: float) -> str:
     if score < level3_min:
         return "level2_medium"
     return "level3_lame"
+
+
+def infer_higher_side(section_name: str, raw_ratio: float) -> str:
+    """Infer which side is higher from a Left / Right style ratio."""
+    left_label, right_label = [part.strip() for part in section_name.split("/")]
+    if raw_ratio > 1:
+        return f"{left_label} higher than {right_label}"
+    if raw_ratio < 1:
+        return f"{right_label} higher than {left_label}"
+    return f"{left_label} equal to {right_label}"
 
 
 def find_shuffle10_h5(videos_dir: Path, pressuremat_id: str) -> Path:
@@ -128,6 +140,7 @@ def build_dataset(
                 "trigger_section": worst_section,
                 "trigger_metric": worst_metric,
                 "raw_ratio": worst_raw_value,
+                "higher_side_interpretation": infer_higher_side(worst_section, worst_raw_value),
                 "source_pressuremat_json": str(pressuremat_path),
                 "source_h5": str(h5_path),
                 "copied_h5": str(destination),
@@ -156,6 +169,7 @@ def write_reports(
             "level2_medium": f"{level1_max} <= worst_asymmetry < {level3_min}",
             "level3_lame": f"worst_asymmetry >= {level3_min}",
             "symmetry_sections_used": list(SYMMETRY_SECTIONS),
+            "symmetry_metrics_used": list(SYMMETRY_METRICS),
             "h5_selection": "shuffle10 only",
         },
         "counts": counts,

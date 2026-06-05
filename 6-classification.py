@@ -8,15 +8,126 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from sklearn.svm import SVC
-from sklearn.model_selection import LeaveOneOut, GridSearchCV
-from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score
+from sklearn.model_selection import LeaveOneOut, GridSearchCV, cross_val_score, StratifiedShuffleSplit
+from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score, confusion_matrix, make_scorer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.feature_selection import SelectKBest, f_classif, SelectFromModel
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.decomposition import PCA
+from sklearn.base import clone, BaseEstimator, ClassifierMixin
+
+class OrdinalClassifier(BaseEstimator, ClassifierMixin):
+    def __init__(self, clf=None):
+        self.clf = clf
+        self.clfs = []
+        self.classes_ = []
+
+    def fit(self, X, y):
+        self.classes_ = np.unique(y)
+        self.clfs = []
+        n_classes = len(self.classes_)
+        for i in range(n_classes - 1):
+            binary_y = (y > i).astype(int)
+            clf = clone(self.clf)
+            clf.fit(X, binary_y)
+            self.clfs.append(clf)
+        return self
+
+    def predict_proba(self, X):
+        probs = []
+        for clf in self.clfs:
+            probs.append(clf.predict_proba(X)[:, 1])
+        probs = np.array(probs).T
+        
+        n_samples = X.shape[0]
+        n_classes = len(self.classes_)
+        class_probs = np.zeros((n_samples, n_classes))
+        
+        class_probs[:, 0] = 1.0 - probs[:, 0]
+        for i in range(1, n_classes - 1):
+            class_probs[:, i] = probs[:, i-1] - probs[:, i]
+        class_probs[:, -1] = probs[:, -1]
+        
+        class_probs = np.clip(class_probs, 0.0, 1.0)
+        row_sums = class_probs.sum(axis=1, keepdims=True)
+        row_sums[row_sums == 0] = 1.0
+        class_probs = class_probs / row_sums
+        
+        return class_probs
+
+    def predict(self, X):
+        class_probs = self.predict_proba(X)
+        return np.argmax(class_probs, axis=1)
+
+class OversamplingPipeline(Pipeline):
+    def fit(self, X, y=None, **fit_params):
+        Xt = X
+        for name, transform in self.steps[:-1]:
+            if transform is None or transform == 'passthrough':
+                continue
+            Xt = transform.fit_transform(Xt, y)
+            
+        y = np.array(y)
+        classes, counts = np.unique(y, return_counts=True)
+        max_count = np.max(counts)
+        
+        new_indices = list(range(len(y)))
+        rng = np.random.default_rng(42)
+        
+        for cls in classes:
+            cls_indices = np.where(y == cls)[0]
+            cls_count = len(cls_indices)
+            if cls_count < max_count:
+                extra_indices = rng.choice(cls_indices, size=(max_count - cls_count), replace=True)
+                new_indices.extend(extra_indices)
+                
+        new_indices = np.array(new_indices)
+        Xt_resampled = Xt[new_indices]
+        y_resampled = y[new_indices]
+        
+        self.steps[-1][1].fit(Xt_resampled, y_resampled)
+        return self
+
+def custom_recall_penalized_scorer(y_true, y_pred):
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2])
+    recalls = []
+    for i in range(3):
+        denom = np.sum(cm[i])
+        rec = cm[i, i] / denom if denom > 0 else 0.0
+        recalls.append(rec)
+    
+    if any(r == 0 for r in recalls):
+        return 0.01 * f1_score(y_true, y_pred, average='macro', zero_division=0)
+        
+    return f1_score(y_true, y_pred, average='macro', zero_division=0)
 
 LAME_LEVEL_CLASSES = ["level1_sound", "level2_medium", "level3_lame"]
+EXCLUDE_SYMMETRY_RATIO_FEATURES = False
+PERMUTATION_TEST_N_PERMUTATIONS = 100
+RANDOM_STATE = 42
+REPEATED_TRAIN_TEST_N_SPLITS = 100
+REPEATED_TRAIN_TEST_TEST_SIZE = 0.30
+
+def build_svm_pipeline():
+    return OversamplingPipeline([
+        ('scaler', StandardScaler()),
+        ('select', SelectKBest(score_func=f_classif)),
+        ('svm', OrdinalClassifier(SVC(probability=True)))
+    ])
+
+def build_param_grid(n_features):
+    # Optimized feature engineering: restrict k to 5 or 10 features to prevent overfitting and help minority class
+    k_values = [5, 10]
+    return {
+        'select__k': k_values,
+        'svm__clf__C': [0.1, 1, 10, 100],
+        'svm__clf__gamma': ['scale', 'auto', 0.1, 0.01],
+        'svm__clf__kernel': ['rbf', 'linear', 'poly'],
+        'svm__clf__class_weight': [None, 'balanced']
+    }
+
 
 def parse_video_id_from_h5(file_name):
     """Extract the video/pressuremat id before the DLC suffix in a DLC h5 filename."""
@@ -189,14 +300,17 @@ def get_features_from_dict(d, prefix=''):
     for k, v in d.items():
         if k in ['unit', 'frames', 'legs', 'leg']: # Skip metadata
             continue
+        if EXCLUDE_SYMMETRY_RATIO_FEATURES and 'symmetry_ratio' in f"{prefix}{k}":
+            # Temporarily exclude all symmetry-ratio-derived features to avoid
+            # circularity with labels created from pressure-mat symmetry tables.
+            continue
         
         if isinstance(v, dict):
             features.update(get_features_from_dict(v, f"{prefix}{k}_"))
         elif isinstance(v, list):
             # check if list of numbers
             if v and isinstance(v[0], (int, float)):
-                features[f"{prefix}{k}_mean"] = np.mean(v)
-                features[f"{prefix}{k}_std"] = np.std(v)
+                features[f"{prefix}{k}_median"] = np.median(v)
             else:
                 pass
         elif isinstance(v, (int, float)):
@@ -240,6 +354,295 @@ def prepare_dataset(classified_features, class_names=None):
         
     return X_vec, np.array(y), all_keys
 
+def load_feature_matrix(feature_file_path, target_names):
+    """Load classified features and convert them to X/y/feature_names."""
+    with open(feature_file_path, 'r') as f:
+        classified_features = json.load(f)
+    return prepare_dataset(classified_features, target_names)
+
+def default_converter(o):
+    if isinstance(o, np.integer): return int(o)
+    if isinstance(o, np.floating): return float(o)
+    if isinstance(o, np.ndarray): return o.tolist()
+    raise TypeError(f"Object of type {o.__class__.__name__} is not JSON serializable")
+
+def run_nested_leave_one_out_cv(X, y, feature_names, target_names, output_dir):
+    """Run nested LOO CV: outer LOO for evaluation, inner LOO for model selection."""
+    print("\nRunning Nested Leave-One-Out CV...")
+    outer_cv = LeaveOneOut()
+    y_true, y_pred = [], []
+    fold_details = []
+    param_counter = Counter()
+    selected_feature_counter = Counter()
+
+    for fold_idx, (train_index, test_index) in enumerate(outer_cv.split(X), start=1):
+        print(f"  Nested outer fold {fold_idx}/{len(y)}")
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        inner_cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+        inner_grid = GridSearchCV(
+            build_svm_pipeline(),
+            build_param_grid(X.shape[1]),
+            cv=inner_cv,
+            scoring='f1_macro',
+            n_jobs=-1,
+            verbose=0,
+        )
+        inner_grid.fit(X_train, y_train)
+        pred = inner_grid.predict(X_test)[0]
+
+        selected_indices = inner_grid.best_estimator_.named_steps['select'].get_support(indices=True)
+        selected_features = [feature_names[i] for i in selected_indices]
+        for feat in selected_features:
+            selected_feature_counter[feat] += 1
+        param_key = json.dumps(inner_grid.best_params_, sort_keys=True, default=default_converter)
+        param_counter[param_key] += 1
+
+        y_true.append(y_test[0])
+        y_pred.append(pred)
+        fold_details.append({
+            "fold": fold_idx,
+            "test_index": int(test_index[0]),
+            "true_label": int(y_test[0]),
+            "pred_label": int(pred),
+            "correct": bool(pred == y_test[0]),
+            "best_params": inner_grid.best_params_,
+            "inner_best_score": float(inner_grid.best_score_),
+            "selected_features": selected_features,
+        })
+
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    accuracy = accuracy_score(y_true, y_pred)
+    report = classification_report(
+        y_true,
+        y_pred,
+        labels=list(range(len(target_names))),
+        target_names=target_names,
+        zero_division=0,
+        output_dict=True,
+    )
+
+    nested_results = {
+        "method": "Nested Leave-One-Out CV",
+        "outer_cv": "LeaveOneOut",
+        "inner_cv": "LeaveOneOut",
+        "accuracy": accuracy,
+        "target_names": target_names,
+        "class_counts": {class_name: int(np.sum(y == i)) for i, class_name in enumerate(target_names)},
+        "classification_report": report,
+        "best_param_frequency": {
+            k: v for k, v in param_counter.most_common()
+        },
+        "selected_feature_frequency": {
+            k: v for k, v in selected_feature_counter.most_common()
+        },
+        "fold_details": fold_details,
+    }
+
+    nested_path = os.path.join(output_dir, 'nested_loo_results.json')
+    with open(nested_path, 'w') as f:
+        json.dump(nested_results, f, indent=4, default=default_converter)
+    print(f"Nested LOO accuracy: {accuracy:.3f}")
+    print(f"Nested LOO results saved to {nested_path}")
+    return nested_results
+
+def run_label_permutation_test(X, y, best_params, target_names, output_dir, n_permutations=PERMUTATION_TEST_N_PERMUTATIONS):
+    """Run a label permutation test using the selected SVM configuration."""
+    print(f"\nRunning Label Permutation Test ({n_permutations} permutations)...")
+    rng = np.random.default_rng(RANDOM_STATE)
+    cv = LeaveOneOut()
+
+    observed_model = build_svm_pipeline()
+    observed_model.set_params(**best_params)
+    observed_scores = cross_val_score(observed_model, X, y, cv=cv, scoring='accuracy', n_jobs=-1)
+    observed_accuracy = float(np.mean(observed_scores))
+
+    permutation_accuracies = []
+    for i in range(n_permutations):
+        if (i + 1) % 10 == 0 or i == 0:
+            print(f"  Permutation {i + 1}/{n_permutations}")
+        y_perm = rng.permutation(y)
+        model = build_svm_pipeline()
+        model.set_params(**best_params)
+        scores = cross_val_score(model, X, y_perm, cv=cv, scoring='accuracy', n_jobs=-1)
+        permutation_accuracies.append(float(np.mean(scores)))
+
+    permutation_accuracies = np.array(permutation_accuracies)
+    p_value = float((np.sum(permutation_accuracies >= observed_accuracy) + 1) / (n_permutations + 1))
+
+    permutation_results = {
+        "method": "Label Permutation Test",
+        "n_permutations": n_permutations,
+        "random_state": RANDOM_STATE,
+        "cv": "LeaveOneOut",
+        "best_params_used": best_params,
+        "observed_accuracy": observed_accuracy,
+        "permutation_accuracy_mean": float(np.mean(permutation_accuracies)),
+        "permutation_accuracy_std": float(np.std(permutation_accuracies)),
+        "permutation_accuracy_min": float(np.min(permutation_accuracies)),
+        "permutation_accuracy_max": float(np.max(permutation_accuracies)),
+        "p_value": p_value,
+        "permutation_accuracies": permutation_accuracies.tolist(),
+        "target_names": target_names,
+    }
+
+    permutation_path = os.path.join(output_dir, 'label_permutation_test_results.json')
+    with open(permutation_path, 'w') as f:
+        json.dump(permutation_results, f, indent=4, default=default_converter)
+    print(f"Observed LOO accuracy: {observed_accuracy:.3f}")
+    print(f"Permutation mean accuracy: {permutation_results['permutation_accuracy_mean']:.3f}")
+    print(f"Permutation p-value: {p_value:.4f}")
+    print(f"Permutation results saved to {permutation_path}")
+    return permutation_results
+
+def run_repeated_stratified_train_test_evaluation(
+    X,
+    y,
+    feature_names,
+    target_names,
+    output_dir,
+    n_splits=REPEATED_TRAIN_TEST_N_SPLITS,
+    test_size=REPEATED_TRAIN_TEST_TEST_SIZE,
+):
+    """Repeated stratified hold-out evaluation with grid search only on train data."""
+    print(
+        f"\nRunning Repeated Stratified Train/Test Evaluation "
+        f"({n_splits} splits, test_size={test_size})..."
+    )
+    splitter = StratifiedShuffleSplit(
+        n_splits=n_splits,
+        test_size=test_size,
+        random_state=RANDOM_STATE,
+    )
+
+    split_details = []
+    accuracies = []
+    macro_f1_scores = []
+    weighted_f1_scores = []
+    aggregate_cm = np.zeros((len(target_names), len(target_names)), dtype=int)
+    param_counter = Counter()
+    selected_feature_counter = Counter()
+
+    for split_idx, (train_index, test_index) in enumerate(splitter.split(X, y), start=1):
+        if split_idx == 1 or split_idx % 10 == 0:
+            print(f"  Train/test split {split_idx}/{n_splits}")
+
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        min_class_count = int(np.min(np.bincount(y_train, minlength=len(target_names))))
+        inner_splits = max(2, min(3, min_class_count))
+        inner_cv = StratifiedKFold(
+            n_splits=inner_splits,
+            shuffle=True,
+            random_state=RANDOM_STATE + split_idx,
+        )
+
+        grid_search = GridSearchCV(
+            build_svm_pipeline(),
+            build_param_grid(X.shape[1]),
+            cv=inner_cv,
+            scoring='f1_macro',
+            n_jobs=-1,
+            verbose=0,
+        )
+        grid_search.fit(X_train, y_train)
+        y_pred = grid_search.predict(X_test)
+
+        accuracy = accuracy_score(y_test, y_pred)
+        macro_f1 = f1_score(y_test, y_pred, average='macro', zero_division=0)
+        weighted_f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+        cm = confusion_matrix(y_test, y_pred, labels=list(range(len(target_names))))
+        aggregate_cm += cm
+
+        selected_indices = grid_search.best_estimator_.named_steps['select'].get_support(indices=True)
+        selected_features = [feature_names[i] for i in selected_indices]
+        for feat in selected_features:
+            selected_feature_counter[feat] += 1
+        param_key = json.dumps(grid_search.best_params_, sort_keys=True, default=default_converter)
+        param_counter[param_key] += 1
+
+        accuracies.append(float(accuracy))
+        macro_f1_scores.append(float(macro_f1))
+        weighted_f1_scores.append(float(weighted_f1))
+        split_details.append({
+            "split": split_idx,
+            "train_size": int(len(train_index)),
+            "test_size": int(len(test_index)),
+            "train_class_counts": {
+                target_names[i]: int(np.sum(y_train == i)) for i in range(len(target_names))
+            },
+            "test_class_counts": {
+                target_names[i]: int(np.sum(y_test == i)) for i in range(len(target_names))
+            },
+            "accuracy": float(accuracy),
+            "macro_f1": float(macro_f1),
+            "weighted_f1": float(weighted_f1),
+            "best_params": grid_search.best_params_,
+            "inner_best_score": float(grid_search.best_score_),
+            "selected_features": selected_features,
+            "y_true": y_test.tolist(),
+            "y_pred": y_pred.tolist(),
+            "test_indices": test_index.tolist(),
+        })
+
+    results = {
+        "method": "Repeated Stratified Train/Test Evaluation",
+        "n_splits": n_splits,
+        "test_size": test_size,
+        "random_state": RANDOM_STATE,
+        "inner_cv": "StratifiedKFold(n_splits=min(3, min_train_class_count))",
+        "target_names": target_names,
+        "class_counts": {target_names[i]: int(np.sum(y == i)) for i in range(len(target_names))},
+        "feature_count": int(X.shape[1]),
+        "accuracy_mean": float(np.mean(accuracies)),
+        "accuracy_std": float(np.std(accuracies)),
+        "accuracy_min": float(np.min(accuracies)),
+        "accuracy_max": float(np.max(accuracies)),
+        "macro_f1_mean": float(np.mean(macro_f1_scores)),
+        "macro_f1_std": float(np.std(macro_f1_scores)),
+        "weighted_f1_mean": float(np.mean(weighted_f1_scores)),
+        "weighted_f1_std": float(np.std(weighted_f1_scores)),
+        "aggregate_confusion_matrix": aggregate_cm.tolist(),
+        "best_param_frequency": {k: v for k, v in param_counter.most_common()},
+        "selected_feature_frequency": {k: v for k, v in selected_feature_counter.most_common()},
+        "split_details": split_details,
+    }
+
+    results_path = os.path.join(output_dir, 'repeated_train_test_results.json')
+    with open(results_path, 'w') as f:
+        json.dump(results, f, indent=4, default=default_converter)
+    print(f"Repeated train/test mean accuracy: {results['accuracy_mean']:.3f} ± {results['accuracy_std']:.3f}")
+    print(f"Repeated train/test mean macro F1: {results['macro_f1_mean']:.3f} ± {results['macro_f1_std']:.3f}")
+    print(f"Repeated train/test results saved to {results_path}")
+
+    try:
+        fig, ax = plt.subplots(figsize=(8, 6))
+        disp = ConfusionMatrixDisplay(
+            confusion_matrix=aggregate_cm,
+            display_labels=target_names,
+        )
+        disp.plot(cmap=plt.cm.Blues, ax=ax, values_format='d')
+        ax.set_title(
+            "Repeated Stratified Train/Test Aggregate Confusion Matrix\n"
+            f"Acc: {results['accuracy_mean']:.3f} ± {results['accuracy_std']:.3f}",
+            fontsize=14,
+            fontweight='bold',
+        )
+        ax.set_xlabel("Predicted label", fontsize=12)
+        ax.set_ylabel("True label", fontsize=12)
+        plt.xticks(rotation=20, ha='right')
+        cm_path = os.path.join(output_dir, 'repeated_train_test_confusion_matrix.png')
+        plt.savefig(cm_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        print(f"Repeated train/test confusion matrix saved to {cm_path}")
+    except Exception as e:
+        print(f"Error generating repeated train/test confusion matrix: {e}")
+
+    return results
+
 def visualize_2d_decision_boundary(X, y, best_model, output_dir, target_names=None):
     print("\nGenerating 2D Decision Boundary visualization...")
     try:
@@ -266,16 +669,16 @@ def visualize_2d_decision_boundary(X, y, best_model, output_dir, target_names=No
         
         # 3. Train a 2D SVM for visualization
         # We try to use the same params as the best model
-        svm_params = best_model.named_steps['svm'].get_params()
-        
-        # Construct a new SVM instance with the same parameters
-        # We only keep parameters that are relevant to the SVC constructor
-        valid_params = {}
-        for k, v in svm_params.items():
-            # Filter out pipeline-specific or irrelevant attributes if any (usually get_params returns valid init params)
-            valid_params[k] = v
-            
-        clf_2d = SVC(**valid_params)
+        svm_step = best_model.named_steps['svm']
+        if isinstance(svm_step, OrdinalClassifier):
+            nested_svm_params = svm_step.clf.get_params()
+            clf_2d = OrdinalClassifier(SVC(**nested_svm_params))
+        else:
+            svm_params = svm_step.get_params()
+            valid_params = {}
+            for k, v in svm_params.items():
+                valid_params[k] = v
+            clf_2d = SVC(**valid_params)
         clf_2d.fit(X_pca, y)
         
         # 4. Plotting
@@ -367,21 +770,9 @@ def SVM_classification(feature_file_path, target_names=None, output_subdir='clas
     for label, class_name in enumerate(target_names):
         print(f"  {label}={class_name} ({int(np.sum(y == label))} samples)")
     
-    # Define pipeline
-    pipe = Pipeline([
-        ('scaler', StandardScaler()),
-        ('select', SelectKBest(score_func=f_classif)),
-        ('svm', SVC(probability=True))
-    ])
-
-    # Define parameter grid
-    param_grid = {
-        'select__k': [5, 10, 20, 'all'],
-        'svm__C': [0.1, 1, 10, 100],
-        'svm__gamma': ['scale', 'auto', 0.1, 0.01],
-        'svm__kernel': ['rbf', 'linear', 'poly'],
-        'svm__class_weight': [None, 'balanced']
-    }
+    # Define pipeline and parameter grid
+    pipe = build_svm_pipeline()
+    param_grid = build_param_grid(X.shape[1])
 
     # Cross-validation strategy
     cv_strategy = LeaveOneOut()
@@ -448,12 +839,6 @@ def SVM_classification(feature_file_path, target_names=None, output_subdir='clas
         "classification_report": classification_report(y_true, y_pred, labels=list(range(len(target_names))), target_names=target_names, zero_division=0, output_dict=True)
     }
 
-    def default_converter(o):
-        if isinstance(o, np.integer): return int(o)
-        if isinstance(o, np.floating): return float(o)
-        if isinstance(o, np.ndarray): return o.tolist()
-        raise TypeError(f"Object of type {o.__class__.__name__} is not JSON serializable")
-
     try:
         with open(results_path, 'w') as f:
             json.dump(gridsearch_results, f, indent=4, default=default_converter)
@@ -493,6 +878,23 @@ def SVM_classification(feature_file_path, target_names=None, output_subdir='clas
 
     # 2. 2D Decision Boundary
     visualize_2d_decision_boundary(X, y, best_model, output_dir, target_names)
+
+    # 3. Strict validation checks
+    strict_results = {
+        "nested_leave_one_out": run_nested_leave_one_out_cv(
+            X, y, feature_names, target_names, output_dir
+        ),
+        "label_permutation_test": run_label_permutation_test(
+            X, y, grid_search.best_params_, target_names, output_dir
+        ),
+        "repeated_stratified_train_test": run_repeated_stratified_train_test_evaluation(
+            X, y, feature_names, target_names, output_dir
+        ),
+    }
+    strict_path = os.path.join(output_dir, 'strict_validation_summary.json')
+    with open(strict_path, 'w') as f:
+        json.dump(strict_results, f, indent=4, default=default_converter)
+    print(f"Strict validation summary saved to {strict_path}")
     
     return accuracy
 

@@ -105,6 +105,7 @@ def custom_recall_penalized_scorer(y_true, y_pred):
 
 LAME_LEVEL_CLASSES = ["level1_sound", "level2_medium", "level3_lame"]
 EXCLUDE_SYMMETRY_RATIO_FEATURES = False
+EXCLUDE_RAW_LEG_FEATURES = False
 PERMUTATION_TEST_N_PERMUTATIONS = 100
 RANDOM_STATE = 42
 REPEATED_TRAIN_TEST_N_SPLITS = 100
@@ -119,12 +120,12 @@ def build_svm_pipeline():
 
 def build_param_grid(n_features):
     # Optimized feature engineering: restrict k to 5 or 10 features to prevent overfitting and help minority class
-    k_values = [5, 10]
+    k_values = [3, 5, 10]
     return {
         'select__k': k_values,
         'svm__clf__C': [0.1, 1, 10, 100],
-        'svm__clf__gamma': ['scale', 'auto', 0.1, 0.01],
-        'svm__clf__kernel': ['rbf', 'linear', 'poly'],
+        'svm__clf__gamma': ['scale', 'auto', 0.1, 0.01, 0.001],
+        'svm__clf__kernel': ['rbf', 'linear'],
         'svm__clf__class_weight': [None, 'balanced']
     }
 
@@ -303,6 +304,8 @@ def get_features_from_dict(d, prefix=''):
         if EXCLUDE_SYMMETRY_RATIO_FEATURES and 'symmetry_ratio' in f"{prefix}{k}":
             # Temporarily exclude all symmetry-ratio-derived features to avoid
             # circularity with labels created from pressure-mat symmetry tables.
+            continue
+        if EXCLUDE_RAW_LEG_FEATURES and prefix == '' and k in ['FL', 'FR', 'BL', 'BR']:
             continue
         
         if isinstance(v, dict):
@@ -765,6 +768,7 @@ def SVM_classification(feature_file_path, target_names=None, output_subdir='clas
         return 0.0
 
     print(f"Dataset shape: {X.shape}")
+    print(f"Features: {feature_names}")
     print(f"Classes: {np.unique(y)}")
     print("Class mapping:")
     for label, class_name in enumerate(target_names):
@@ -965,10 +969,16 @@ def lame_level_classification_operation():
     extract_features_multiclass(class_ids, feature_file_path, output_features_path)
 
     print("\n--- Step 3: 3-class SVM Classification ---")
+    if EXCLUDE_RAW_LEG_FEATURES and EXCLUDE_SYMMETRY_RATIO_FEATURES:
+        output_dir_name = 'classification_lame_level_posture_only'
+    elif EXCLUDE_RAW_LEG_FEATURES:
+        output_dir_name = 'classification_lame_level_no_raw_leg'
+    else:
+        output_dir_name = 'classification_lame_level'
     SVM_classification(
         output_features_path,
         target_names=LAME_LEVEL_CLASSES,
-        output_subdir='classification_lame_level',
+        output_subdir=output_dir_name,
     )
 
 def main():

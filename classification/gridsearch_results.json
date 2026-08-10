@@ -1,44 +1,57 @@
 {
     "best_params": {
-        "select__k": 5,
-        "svm__C": 0.1,
-        "svm__class_weight": "balanced",
-        "svm__gamma": "scale",
-        "svm__kernel": "linear"
+        "select__k": 10,
+        "svm__clf__C": 1,
+        "svm__clf__class_weight": null,
+        "svm__clf__gamma": "scale",
+        "svm__clf__kernel": "linear"
     },
-    "best_cv_score": 0.90625,
+    "best_cv_score": 0.96875,
     "selected_features": [
-        "BL_stance_time_values_mean",
-        "FL_stance_time_values_mean",
-        "FR_stance_time_values_mean",
-        "back_height_feature_H_values_mean",
-        "front_hoof_release_angle_alpha1_values_mean"
+        "BL_stance_time_values_median",
+        "BL_stride_length_values_median",
+        "BL_stride_time_values_median",
+        "BR_stance_time_values_median",
+        "FL_stance_time_values_median",
+        "FL_stride_time_values_median",
+        "FR_stance_time_values_median",
+        "FR_stride_time_values_median",
+        "back_height_feature_H_values_median",
+        "front_hoof_release_angle_alpha1_values_median"
     ],
-    "final_accuracy": 0.90625,
+    "final_accuracy": 0.9375,
+    "target_names": [
+        "lame",
+        "sound"
+    ],
+    "class_counts": {
+        "lame": 12,
+        "sound": 20
+    },
     "classification_report": {
-        "Sound": {
-            "precision": 0.9473684210526315,
-            "recall": 0.9,
-            "f1-score": 0.9230769230769231,
-            "support": 20.0
-        },
-        "Lame": {
-            "precision": 0.8461538461538461,
+        "lame": {
+            "precision": 0.9166666666666666,
             "recall": 0.9166666666666666,
-            "f1-score": 0.88,
+            "f1-score": 0.9166666666666666,
             "support": 12.0
         },
-        "accuracy": 0.90625,
+        "sound": {
+            "precision": 0.95,
+            "recall": 0.95,
+            "f1-score": 0.95,
+            "support": 20.0
+        },
+        "accuracy": 0.9375,
         "macro avg": {
-            "precision": 0.8967611336032388,
-            "recall": 0.9083333333333333,
-            "f1-score": 0.9015384615384616,
+            "precision": 0.9333333333333333,
+            "recall": 0.9333333333333333,
+            "f1-score": 0.9333333333333333,
             "support": 32.0
         },
         "weighted avg": {
-            "precision": 0.909412955465587,
-            "recall": 0.90625,
-            "f1-score": 0.9069230769230769,
+            "precision": 0.9375,
+            "recall": 0.9375,
+            "f1-score": 0.9375,
             "support": 32.0
         }
     }

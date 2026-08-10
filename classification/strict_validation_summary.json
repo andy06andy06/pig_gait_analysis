@@ -1,0 +1,11 @@
+{
+    "nested_leave_one_out": {
+        "skipped": true
+    },
+    "label_permutation_test": {
+        "skipped": true
+    },
+    "repeated_stratified_train_test": {
+        "skipped": true
+    }
+}

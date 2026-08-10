@@ -865,12 +865,12 @@ def SVM_classification(feature_file_path, target_names=None, output_subdir='clas
         cm_display.ax_.set_title(f"SVM Best Model Confusion Matrix\nAcc: {accuracy:.2f}", fontsize=16, fontweight='bold')
         cm_display.ax_.set_xlabel("Predicted label", fontsize=13)
         cm_display.ax_.set_ylabel("True label", fontsize=13)
-        cm_display.ax_.tick_params(axis='both', labelsize=12)
+        cm_display.ax_.tick_params(axis='both', labelsize=18)
 
         # Enlarge values inside each confusion-matrix cell
         if hasattr(cm_display, 'text_') and cm_display.text_ is not None:
             for txt in cm_display.text_.ravel():
-                txt.set_fontsize(13)
+                txt.set_fontsize(26)
                 txt.set_fontweight('bold')
 
         cm_path = os.path.join(output_dir, 'svm_confusion_matrix.png')

@@ -6,16 +6,23 @@ same-limb-pair left/right asymmetry score from the ``Left Front / Right Front``
 and ``Left Hind / Right Hind`` sections in each symmetry table, and copies the
 matching DeepLabCut ``shuffle10`` h5 file into a new classified dataset folder.
 
-Default thresholds follow the animal-science interpretation that lameness should
-be defined by excessive left/right imbalance within the front pair or hind pair:
+The classification uses multiple pressure-mat symmetry metrics:
 
-    level1_sound:  worst_asymmetry < 1.30
-    level2_medium: 1.30 <= worst_asymmetry < 1.60
-    level3_lame:   worst_asymmetry >= 1.60
+    Stance Time, Stride Time, Stride Length, Stride Velocity, Max Force
 
-The asymmetry score treats ratios above and below 1 symmetrically:
+For each metric, the asymmetry score treats ratios above and below 1
+symmetrically:
 
     score = max(ratio, 1 / ratio)
+
+For each metric, the script first finds the worst front/hind left-right
+asymmetry. The final per-pig score is a weighted average across metrics, with
+Max Force intentionally weighted higher than the temporal/spatial metrics.
+Default thresholds are:
+
+    level1_sound:  weighted_asymmetry < 1.30
+    level2_medium: 1.30 <= weighted_asymmetry < 1.50
+    level3_lame:   weighted_asymmetry >= 1.50
 
 Only h5 files containing ``shuffle10`` in the filename are copied.
 """
@@ -30,10 +37,23 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
-DEFAULT_LEVEL1_MAX = 1.41
-DEFAULT_LEVEL3_MIN = 1.48
+DEFAULT_LEVEL1_MAX = 1.30
+DEFAULT_LEVEL3_MIN = 1.50
 SYMMETRY_SECTIONS = ("Left Front / Right Front", "Left Hind / Right Hind")
-SYMMETRY_METRICS = ("Max Force",)
+SYMMETRY_METRICS = (
+    "Stance Time",
+    "Stride Time",
+    "Stride Length",
+    "Stride Velocity",
+    "Max Force",
+)
+METRIC_WEIGHTS = {
+    "Stance Time": 0.05,
+    "Stride Time": 0.05,
+    "Stride Length": 0.05,
+    "Stride Velocity": 0.05,
+    "Max Force": 0.80,
+}
 
 
 def asymmetry_score(value: float) -> Optional[float]:
@@ -58,6 +78,45 @@ def iter_symmetry_values(data: Dict[str, Any]) -> Iterable[Tuple[str, str, float
             if score is None:
                 continue
             yield section_name, metric_name, float(raw_value), score
+
+
+def calculate_weighted_asymmetry(
+    values: Iterable[Tuple[str, str, float, float]]
+) -> Tuple[float, str, str, float, float, Dict[str, float]]:
+    """Calculate weighted asymmetry after taking the worst score per metric.
+
+    Returns final_score, dominant_section, dominant_metric, dominant_raw_ratio,
+    dominant_unweighted_score, and per-metric worst scores. The dominant metric
+    is selected by weighted contribution, so Max Force is prioritized according
+    to METRIC_WEIGHTS.
+    """
+    worst_by_metric: Dict[str, Tuple[str, str, float, float]] = {}
+    for section_name, metric_name, raw_ratio, score in values:
+        previous = worst_by_metric.get(metric_name)
+        if previous is None or score > previous[3]:
+            worst_by_metric[metric_name] = (section_name, metric_name, raw_ratio, score)
+
+    for metric in SYMMETRY_METRICS:
+        # Missing pressure-mat symmetry values are treated as neutral/asymmetry-free
+        # so incomplete metrics do not remove an otherwise usable pig sample.
+        if metric not in worst_by_metric:
+            worst_by_metric[metric] = ("missing", metric, 1.0, 1.0)
+
+    weight_sum = sum(METRIC_WEIGHTS[metric] for metric in SYMMETRY_METRICS)
+    if weight_sum <= 0:
+        raise RuntimeError("Metric weights must sum to a positive value")
+
+    final_score = sum(
+        METRIC_WEIGHTS[metric] * worst_by_metric[metric][3] for metric in SYMMETRY_METRICS
+    ) / weight_sum
+    dominant = max(
+        worst_by_metric.values(),
+        key=lambda item: METRIC_WEIGHTS[item[1]] * item[3],
+    )
+    per_metric_scores = {
+        metric: round(worst_by_metric[metric][3], 6) for metric in SYMMETRY_METRICS
+    }
+    return final_score, dominant[0], dominant[1], dominant[2], dominant[3], per_metric_scores
 
 
 def classify(score: float, level1_max: float, level3_min: float) -> str:
@@ -124,10 +183,15 @@ def build_dataset(
         if not values:
             raise RuntimeError(f"No usable symmetry values found in {pressuremat_path}")
 
-        worst_section, worst_metric, worst_raw_value, worst_score = max(
-            values, key=lambda item: item[3]
-        )
-        level = classify(worst_score, level1_max, level3_min)
+        (
+            weighted_score,
+            worst_section,
+            worst_metric,
+            worst_raw_value,
+            worst_unweighted_score,
+            per_metric_scores,
+        ) = calculate_weighted_asymmetry(values)
+        level = classify(weighted_score, level1_max, level3_min)
         h5_path = find_shuffle10_h5(videos_dir, pressuremat_id)
         destination = output_dir / level / h5_path.name
         shutil.copy2(h5_path, destination)
@@ -136,10 +200,12 @@ def build_dataset(
             {
                 "pressuremat_id": pressuremat_id,
                 "level": level,
-                "worst_asymmetry_score": round(worst_score, 6),
-                "trigger_section": worst_section,
-                "trigger_metric": worst_metric,
-                "raw_ratio": worst_raw_value,
+                "weighted_asymmetry_score": round(weighted_score, 6),
+                "dominant_unweighted_score": round(worst_unweighted_score, 6),
+                "dominant_section": worst_section,
+                "dominant_metric": worst_metric,
+                "dominant_raw_ratio": worst_raw_value,
+                "per_metric_worst_scores": per_metric_scores,
                 "higher_side_interpretation": infer_higher_side(worst_section, worst_raw_value),
                 "source_pressuremat_json": str(pressuremat_path),
                 "source_h5": str(h5_path),
@@ -165,11 +231,14 @@ def write_reports(
 
     report = {
         "settings": {
-            "level1_sound": f"worst_asymmetry < {level1_max}",
-            "level2_medium": f"{level1_max} <= worst_asymmetry < {level3_min}",
-            "level3_lame": f"worst_asymmetry >= {level3_min}",
+            "level1_sound": f"weighted_asymmetry < {level1_max}",
+            "level2_medium": f"{level1_max} <= weighted_asymmetry < {level3_min}",
+            "level3_lame": f"weighted_asymmetry >= {level3_min}",
+            "score_method": "weighted average of per-metric worst same-limb-pair left/right asymmetry",
+            "missing_metric_policy": "missing metric values are treated as neutral score 1.0",
             "symmetry_sections_used": list(SYMMETRY_SECTIONS),
             "symmetry_metrics_used": list(SYMMETRY_METRICS),
+            "metric_weights": METRIC_WEIGHTS,
             "h5_selection": "shuffle10 only",
         },
         "counts": counts,

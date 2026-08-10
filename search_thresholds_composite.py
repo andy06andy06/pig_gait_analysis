@@ -3,14 +3,14 @@ import os
 import json
 import glob
 import numpy as np
+from joblib import Parallel, delayed
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import LeaveOneOut
 from sklearn.metrics import accuracy_score, f1_score
 
-# Reuse functions or replicate them from code/6-classification.py
 EXCLUDE_SYMMETRY_RATIO_FEATURES = True
 
 def get_features_from_dict(d, prefix=''):
@@ -37,12 +37,9 @@ def prepare_dataset_from_mapping(class_ids, data):
     
     for label, class_name in enumerate(class_names):
         for vid in class_ids[class_name]:
-            if vid in data:
-                feats = get_features_from_dict(data[vid])
-                X.append(feats)
-                y.append(label)
-            elif f"{vid}D" in data:
-                feats = get_features_from_dict(data[f"{vid}D"])
+            key = vid if vid in data else (f"{vid}D" if f"{vid}D" in data else None)
+            if key:
+                feats = get_features_from_dict(data[key])
                 X.append(feats)
                 y.append(label)
                 
@@ -60,8 +57,7 @@ def prepare_dataset_from_mapping(class_ids, data):
     
     return X_vec, np.array(y), all_keys
 
-def evaluate_thresholds(t1, t2, scores_map, features_data):
-    # Classify based on thresholds
+def evaluate_single_pair(t1, t2, scores_map, features_data):
     class_ids = {"level1_sound": [], "level2_medium": [], "level3_lame": []}
     for vid, score in scores_map.items():
         if score < t1:
@@ -75,21 +71,14 @@ def evaluate_thresholds(t1, t2, scores_map, features_data):
     c1 = len(class_ids["level2_medium"])
     c2 = len(class_ids["level3_lame"])
     
-    # Conditions:
-    # 1. Level 0 and Level 2 are the most populated
-    # 2. Level 1 is the minority (specifically, count(level1) < count(level0) and count(level1) < count(level2))
-    # 3. All classes must have at least some samples (e.g., Level 1 >= 2, Level 2 >= 4)
-    if not (c0 > c1 and c2 > c1 and c1 >= 2 and c2 >= 4 and c0 >= 4):
+    # Requirement: All 3 classes must have at least 6 samples for balanced evaluation
+    if c0 < 6 or c1 < 6 or c2 < 6:
         return None
         
     X, y, _ = prepare_dataset_from_mapping(class_ids, features_data)
     if len(X) == 0:
         return None
         
-    # Evaluate using standard SVM pipeline
-    # We will test two standard configs to see which one works better:
-    # Config A: select k=5, linear kernel
-    # Config B: select k='all', RBF kernel
     pipe_a = Pipeline([
         ('scaler', StandardScaler()),
         ('select', SelectKBest(score_func=f_classif, k=5)),
@@ -97,11 +86,11 @@ def evaluate_thresholds(t1, t2, scores_map, features_data):
     ])
     
     pipe_b = Pipeline([
-        ('scaler', StandardScaler()),
+        ('scaler', RobustScaler()),
+        ('select', SelectKBest(score_func=f_classif, k=10)),
         ('svm', SVC(kernel='rbf', C=10.0, gamma='scale', class_weight='balanced'))
     ])
     
-    # Evaluate using LOO CV
     loo = LeaveOneOut()
     y_true, y_pred_a, y_pred_b = [], [], []
     
@@ -125,18 +114,8 @@ def evaluate_thresholds(t1, t2, scores_map, features_data):
             
     acc_a = accuracy_score(y_true, y_pred_a)
     f1_a = f1_score(y_true, y_pred_a, average='macro', zero_division=0)
-    
     acc_b = accuracy_score(y_true, y_pred_b)
     f1_b = f1_score(y_true, y_pred_b, average='macro', zero_division=0)
-    
-    # Check if level3_lame recall is non-zero in at least one config
-    # level3 corresponds to class index 2
-    y_true_arr = np.array(y_true)
-    y_pred_a_arr = np.array(y_pred_a)
-    y_pred_b_arr = np.array(y_pred_b)
-    
-    recall_c2_a = np.sum((y_true_arr == 2) & (y_pred_a_arr == 2)) / np.sum(y_true_arr == 2) if np.sum(y_true_arr == 2) > 0 else 0.0
-    recall_c2_b = np.sum((y_true_arr == 2) & (y_pred_b_arr == 2)) / np.sum(y_true_arr == 2) if np.sum(y_true_arr == 2) > 0 else 0.0
     
     return {
         "t1": t1,
@@ -144,17 +123,14 @@ def evaluate_thresholds(t1, t2, scores_map, features_data):
         "counts": (c0, c1, c2),
         "acc_a": acc_a,
         "f1_a": f1_a,
-        "recall_c2_a": recall_c2_a,
         "acc_b": acc_b,
         "f1_b": f1_b,
-        "recall_c2_b": recall_c2_b,
     }
 
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     videos_dir = os.path.join(base_dir, '../videos')
     
-    # 1. Parse pressuremat files
     scores_map = {}
     for p in sorted(glob.glob(os.path.join(videos_dir, '*_pressuremat.json'))):
         vid = os.path.basename(p).replace('_pressuremat.json', '')
@@ -169,37 +145,30 @@ def main():
         score = max(score_lf_rf, score_lh_rh)
         scores_map[vid] = score
         
-    # 2. Load standardized features
     features_path = os.path.join(base_dir, '3-standardized_keyframe_features.json')
     with open(features_path) as f:
         features_data = json.load(f)
         
-    # 3. Grid search over thresholds
-    results = []
-    # Generate grids of thresholds with step 0.01
     t1_values = np.arange(1.15, 1.45, 0.01)
     t2_values = np.arange(1.30, 1.65, 0.01)
     
-    for t1 in t1_values:
-        for t2 in t2_values:
-            if t2 <= t1 + 0.04:
-                continue
-            res = evaluate_thresholds(round(t1, 3), round(t2, 3), scores_map, features_data)
-            if res:
-                results.append(res)
-                
-    # Sort results
+    pairs = [(round(t1, 3), round(t2, 3)) for t1 in t1_values for t2 in t2_values if t2 > t1 + 0.04]
+    
+    print(f"Evaluating {len(pairs)} pairs in parallel...")
+    results = Parallel(n_jobs=-1)(
+        delayed(evaluate_single_pair)(t1, t2, scores_map, features_data) for t1, t2 in pairs
+    )
+    
+    results = [r for r in results if r is not None]
     print(f"Found {len(results)} valid configurations matching criteria.")
+    results.sort(key=lambda x: max(x['acc_a'], x['acc_b']), reverse=True)
     
-    # Display top 15 by F1 score or recall
-    results.sort(key=lambda x: max(x['f1_a'], x['f1_b']), reverse=True)
-    
-    print("\nTop 15 configurations sorted by Max(F1_A, F1_B):")
-    print(f"{'t1':<6} | {'t2':<6} | {'Counts (L0,L1,L2)':<18} | {'Acc A':<5} | {'F1 A':<5} | {'Recall L2 A':<11} | {'Acc B':<5} | {'F1 B':<5} | {'Recall L2 B':<11}")
-    print("-" * 105)
+    print("\nTop 15 configurations sorted by Max(Acc_A, Acc_B):")
+    print(f"{'t1':<6} | {'t2':<6} | {'Counts (L1,L2,L3)':<18} | {'Acc A':<6} | {'F1 A':<6} | {'Acc B':<6} | {'F1 B':<6}")
+    print("-" * 75)
     for r in results[:15]:
         counts_str = f"({r['counts'][0]}, {r['counts'][1]}, {r['counts'][2]})"
-        print(f"{r['t1']:<6.3f} | {r['t2']:<6.3f} | {counts_str:<18} | {r['acc_a']:<5.3f} | {r['f1_a']:<5.3f} | {r['recall_c2_a']:<11.3f} | {r['acc_b']:<5.3f} | {r['f1_b']:<5.3f} | {r['recall_c2_b']:<11.3f}")
+        print(f"{r['t1']:<6.3f} | {r['t2']:<6.3f} | {counts_str:<18} | {r['acc_a']:<6.3f} | {r['f1_a']:<6.3f} | {r['acc_b']:<6.3f} | {r['f1_b']:<6.3f}")
 
 if __name__ == '__main__':
     main()

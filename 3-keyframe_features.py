@@ -2,6 +2,55 @@ import json
 import os
 from typing import Dict, List, Optional, Any, Tuple
 import math
+import numpy as np
+
+def compute_head_bobbing_and_trunk(video_key: str, keyframe_coords: Dict[str, Any]) -> Dict[str, Any]:
+    if video_key not in keyframe_coords:
+        return {"head_y_sd": None, "head_y_amp": None, "trunk_length_mean": None}
+    payload = keyframe_coords[video_key]
+    items = []
+    if isinstance(payload, list):
+        items = payload
+    elif isinstance(payload, dict) and isinstance(payload.get("items"), list):
+        items = payload.get("items", [])
+    elif isinstance(payload, dict):
+        for leg in ("FL", "FR", "BL", "BR"):
+            items.extend(payload.get(leg, []) or [])
+            
+    head_relative_y = []
+    trunk_lengths = []
+    
+    for it in items:
+        if not isinstance(it, dict) or "coords" not in it:
+            continue
+        coords = it["coords"] or {}
+        nose = coords.get("nose")
+        f_back = coords.get("F_back")
+        b_back = coords.get("B_back")
+        
+        if isinstance(nose, dict) and isinstance(f_back, dict):
+            ny, fy = nose.get("y"), f_back.get("y")
+            if ny is not None and fy is not None:
+                head_relative_y.append(ny - fy)
+                
+        if isinstance(f_back, dict) and isinstance(b_back, dict):
+            fx, fy = f_back.get("x"), f_back.get("y")
+            bx, by = b_back.get("x"), b_back.get("y")
+            if all(v is not None for v in (fx, fy, bx, by)):
+                t_len = math.sqrt((fx - bx)**2 + (fy - by)**2)
+                if t_len > 0:
+                    trunk_lengths.append(t_len)
+                    
+    head_sd = float(np.std(head_relative_y)) if head_relative_y else None
+    head_amp = float(np.ptp(head_relative_y)) if head_relative_y else None
+    trunk_mean = float(np.mean(trunk_lengths)) if trunk_lengths else None
+    
+    return {
+        "head_y_sd": head_sd,
+        "head_y_amp": head_amp,
+        "trunk_length_mean": trunk_mean
+    }
+
 
 def _normalize_hoof_name(hoof: str, part: str = "hoof") -> str:
     """Return the coords base key used in keyframe_coords (e.g., 'FL_hoof')."""
@@ -484,7 +533,7 @@ if __name__ == "__main__":
     coords_path = os.path.join(base_dir, "2-keyframe_coords.json")
     starts_only_path = os.path.join(base_dir, "1-keyframes_starts_only.json")
     segments_path = os.path.join(base_dir, "1-keyframes_segments.json")
-    output_path = os.path.join(base_dir, "3-keyframe_feature.json")
+    output_path = os.path.join(base_dir, "3-keyframe_features.json")
 
     if not os.path.isfile(coords_path):
         raise FileNotFoundError(f"Not found: {coords_path}")
@@ -723,6 +772,9 @@ if __name__ == "__main__":
     features_with_units: Dict[str, Dict[str, Dict[str, Any]]] = {}
     for vk in sorted(video_keys, key=str):
         features_with_units[vk] = {}
+        hb_trunk = compute_head_bobbing_and_trunk(vk, keyframe_coords)
+        trunk_len = hb_trunk.get("trunk_length_mean")
+
         # Per-leg metrics
         for h in hooves:
             metrics = features.get(vk, {}).get(h, {}) or {}
@@ -735,32 +787,59 @@ if __name__ == "__main__":
 
             stance_frames = metrics.get("stance_time", []) or []
             stance_secs = [round((fr or 0) / fps, 2) for fr in stance_frames]
+
+            # Compute Duty Factor (stance_time / stride_time)
+            duty_factors = []
+            for st, strd in zip(stance_secs, st_secs):
+                if strd > 0:
+                    duty_factors.append(round(st / strd, 4))
+
+            # Trunk-length normalized stride length
+            norm_sl = []
+            if isinstance(trunk_len, (int, float)) and trunk_len > 0:
+                norm_sl = [round(v / trunk_len, 4) for v in sl_vals]
             
             features_with_units[vk][h] = {
                 "stride_time": {"unit": "s", "values": st_secs},
                 "stride_length": {"unit": "pixels", "values": sl_vals},
                 "stance_time": {"unit": "s", "values": stance_secs},
+                "duty_factor": {"unit": "ratio", "values": duty_factors},
+                "normalized_stride_length": {"unit": "ratio", "values": norm_sl},
             }
+
+        # Head bobbing metrics
+        features_with_units[vk]["head_bobbing"] = {
+            "head_y_sd": {"unit": "pixels", "values": [round(hb_trunk["head_y_sd"], 2)] if hb_trunk["head_y_sd"] is not None else []},
+            "head_y_amp": {"unit": "pixels", "values": [round(hb_trunk["head_y_amp"], 2)] if hb_trunk["head_y_amp"] is not None else []},
+        }
 
         # Hoof release angle metrics (front and hind)
         angles_front = features.get(vk, {}).get("front_hoof_release_angle")
         if isinstance(angles_front, dict):
             a1 = [round(v, 2) for v in (angles_front.get("alpha1") or [])]
             a2 = [round(v, 2) for v in (angles_front.get("alpha2") or [])]
+            a1_rom = round(max(a1) - min(a1), 2) if a1 else None
+            a2_rom = round(max(a2) - min(a2), 2) if a2 else None
             features_with_units[vk]["front_hoof_release_angle"] = {
                 "leg": angles_front.get("leg"),
                 "alpha1": {"unit": "deg", "values": a1},
                 "alpha2": {"unit": "deg", "values": a2},
+                "alpha1_rom": {"unit": "deg", "values": [a1_rom] if a1_rom is not None else []},
+                "alpha2_rom": {"unit": "deg", "values": [a2_rom] if a2_rom is not None else []},
             }
 
         angles_hind = features.get(vk, {}).get("hind_hoof_release_angle")
         if isinstance(angles_hind, dict):
             a1h = [round(v, 2) for v in (angles_hind.get("alpha1") or [])]
             a2h = [round(v, 2) for v in (angles_hind.get("alpha2") or [])]
+            a1h_rom = round(max(a1h) - min(a1h), 2) if a1h else None
+            a2h_rom = round(max(a2h) - min(a2h), 2) if a2h else None
             features_with_units[vk]["hind_hoof_release_angle"] = {
                 "leg": angles_hind.get("leg"),
                 "alpha1": {"unit": "deg", "values": a1h},
                 "alpha2": {"unit": "deg", "values": a2h},
+                "alpha1_rom": {"unit": "deg", "values": [a1h_rom] if a1h_rom is not None else []},
+                "alpha2_rom": {"unit": "deg", "values": [a2h_rom] if a2h_rom is not None else []},
             }
 
         # Back/neck angle metrics
@@ -783,6 +862,7 @@ if __name__ == "__main__":
 
         # Compute symmetry ratios
         features_with_units[vk]["symmetry_ratio"] = compute_symmetry(features.get(vk, {}))
+
 
     # Write output JSON (readable)
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:

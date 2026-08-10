@@ -1,0 +1,12 @@
+{
+  "3_class_baseline_nested_acc": 0.3333333333333333,
+  "3_class_full_nested_acc": 0.28205128205128205,
+  "3_class_full_nested_f1": 0.26431700517722023,
+  "permutation_p_value": 0.8387096774193549,
+  "ordinal_nested_acc": 0.46153846153846156,
+  "svr_pearson_r": 0.2723789180570669,
+  "svr_r2": -0.25127326054129284,
+  "svr_discretized_acc": 0.5384615384615384,
+  "binary_nested_acc": 0.52,
+  "binary_nested_f1": 0.512987012987013
+}

@@ -1,0 +1,33 @@
+{
+  "3_class_accuracy": 0.3333333333333333,
+  "3_class_f1_macro": 0.30567595459236324,
+  "3_class_confusion_matrix": [
+    [
+      7,
+      4,
+      6
+    ],
+    [
+      5,
+      5,
+      4
+    ],
+    [
+      5,
+      2,
+      1
+    ]
+  ],
+  "2_class_accuracy": 0.36,
+  "2_class_f1_macro": 0.33333333333333337,
+  "2_class_confusion_matrix": [
+    [
+      7,
+      10
+    ],
+    [
+      6,
+      2
+    ]
+  ]
+}

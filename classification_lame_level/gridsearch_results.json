@@ -1,18 +1,18 @@
 {
     "best_params": {
         "select__k": 3,
-        "svm__clf__C": 10,
+        "svm__clf__C": 100,
         "svm__clf__class_weight": "balanced",
-        "svm__clf__gamma": "scale",
+        "svm__clf__gamma": 0.001,
         "svm__clf__kernel": "linear"
     },
-    "best_cv_score": 0.6410256410256411,
+    "best_cv_score": 0.6666666666666666,
     "selected_features": [
         "BL_stride_time_values_median",
         "BR_stride_time_values_median",
         "FR_duty_factor_values_median"
     ],
-    "final_accuracy": 0.5897435897435898,
+    "final_accuracy": 0.5384615384615384,
     "target_names": [
         "level1_sound",
         "level2_medium",
@@ -31,28 +31,28 @@
             "support": 17.0
         },
         "level2_medium": {
-            "precision": 0.6666666666666666,
+            "precision": 0.5333333333333333,
             "recall": 0.5714285714285714,
-            "f1-score": 0.6153846153846154,
+            "f1-score": 0.5517241379310345,
             "support": 14.0
         },
         "level3_lame": {
-            "precision": 0.375,
-            "recall": 0.375,
-            "f1-score": 0.375,
+            "precision": 0.2,
+            "recall": 0.125,
+            "f1-score": 0.15384615384615385,
             "support": 8.0
         },
-        "accuracy": 0.5897435897435898,
+        "accuracy": 0.5384615384615384,
         "macro avg": {
-            "precision": 0.5577485380116959,
-            "recall": 0.5507703081232492,
-            "f1-score": 0.5523504273504273,
+            "precision": 0.45497076023391814,
+            "recall": 0.4674369747899159,
+            "f1-score": 0.45741231948128497,
             "support": 39.0
         },
         "weighted avg": {
-            "precision": 0.5915429599640125,
-            "recall": 0.5897435897435898,
-            "f1-score": 0.5884286653517423,
+            "precision": 0.5077822762033289,
+            "recall": 0.5384615384615384,
+            "f1-score": 0.5202112947471037,
             "support": 39.0
         }
     }

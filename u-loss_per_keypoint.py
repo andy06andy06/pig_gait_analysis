@@ -25,7 +25,7 @@ slide_bodyparts = [
     "B_elbow", "F_elbow", "nose", "F_back",
     "M_back", "B_back", "B_improvement", "F_improvement",
 ]
-slide_xtick_labels = [str(i) for i in range(1, 17)]
+slide_xtick_labels = [chr(ord('A') + i) for i in range(16)]
 
 modes = [
     ("Train error (px)", "Test error (px)",            "_no_pcutoff"),

@@ -1,0 +1,64 @@
+{
+    "best_params": {
+        "select__k": 8,
+        "svm__C": 10,
+        "svm__class_weight": "balanced",
+        "svm__gamma": "scale",
+        "svm__kernel": "rbf"
+    },
+    "best_cv_score": 0.6153846153846154,
+    "selected_features": [
+        "back_neck_angle_beta1_values_median",
+        "back_neck_angle_beta2_values_median",
+        "front_hoof_release_angle_alpha1_values_median",
+        "front_hoof_release_angle_alpha2_values_median",
+        "hind_hoof_release_angle_alpha1_values_median",
+        "hind_hoof_release_angle_alpha2_values_median",
+        "symmetry_ratio_Front / Hind_stance_time",
+        "symmetry_ratio_Left / Right_stance_time"
+    ],
+    "final_accuracy": 0.6153846153846154,
+    "target_names": [
+        "level0_sound",
+        "level1_medium",
+        "level2_severe"
+    ],
+    "class_counts": {
+        "level0_sound": 58,
+        "level1_medium": 31,
+        "level2_severe": 2
+    },
+    "classification_report": {
+        "level0_sound": {
+            "precision": 0.7346938775510204,
+            "recall": 0.6206896551724138,
+            "f1-score": 0.6728971962616822,
+            "support": 58.0
+        },
+        "level1_medium": {
+            "precision": 0.45,
+            "recall": 0.5806451612903226,
+            "f1-score": 0.5070422535211268,
+            "support": 31.0
+        },
+        "level2_severe": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "accuracy": 0.6153846153846154,
+        "macro avg": {
+            "precision": 0.7282312925170068,
+            "recall": 0.7337782721542455,
+            "f1-score": 0.7266464832609363,
+            "support": 91.0
+        },
+        "weighted avg": {
+            "precision": 0.6435411527248263,
+            "recall": 0.6153846153846154,
+            "f1-score": 0.6235862334322252,
+            "support": 91.0
+        }
+    }
+}

@@ -32,11 +32,13 @@ modes = [
     ("Train error (px) with p-cutoff", "Test error (px) with p-cutoff", "_with_pcutoff"),
 ]
 
+SCALE_MM = 1.754  # 1.754 mm/pixel
+
 def get_row_values(df, error_type, bodyparts):
     row = df[df["Error Type"] == error_type]
     if row.empty:
         raise ValueError(f"找不到 {error_type}，CSV 內的 Error Type 有：{df['Error Type'].tolist()}")
-    return row[bodyparts].iloc[0].astype(float).to_numpy()
+    return row[bodyparts].iloc[0].astype(float).to_numpy() * SCALE_MM
 
 def reorder_by_slide(vals, bodyparts, desired_order):
     mapping = {bp: v for bp, v in zip(bodyparts, vals)}
@@ -61,7 +63,7 @@ def plot_grouped(train_vals, test_vals, bodyparts, title, out_path, xtick_labels
 
     plt.xticks(x, labels, rotation=xtick_rotation, ha=xtick_ha)
     plt.xlabel("Keypoints")
-    plt.ylabel("Error (px)")
+    plt.ylabel("Error (mm)")
     plt.title(title)
     plt.legend(fontsize=legend_fontsize)
 
@@ -85,7 +87,7 @@ for train_key, test_key, suffix in modes:
     train_vals = get_row_values(df, train_key, bodyparts)
     test_vals  = get_row_values(df, test_key, bodyparts)
 
-    title = f"Per-keypoint Train/Test Error (px){' — with p-cutoff' if 'with p-cutoff' in train_key else ''}"
+    title = f"Per-keypoint Train/Test Error (mm){' — with p-cutoff' if 'with p-cutoff' in train_key else ''}"
     out_path = f"../evaluation-results/iteration-0/pig_gait_v1Feb26-trainset95shuffle9/{out_base}{suffix}.png"
     plot_grouped(train_vals, test_vals, bodyparts, title, out_path)
     print(f"已輸出圖檔: {out_path}")
@@ -93,7 +95,7 @@ for train_key, test_key, suffix in modes:
     # 額外輸出投影片用：按照指定順序重排並換上帶編號的新標籤
     train_slide = reorder_by_slide(train_vals, bodyparts, slide_bodyparts)
     test_slide  = reorder_by_slide(test_vals, bodyparts, slide_bodyparts)
-    slide_title = f"Per-keypoint Train/Test Error (px) — slide order{' — with p-cutoff' if 'with p-cutoff' in train_key else ''}"
+    slide_title = f"Per-keypoint Train/Test Error (mm) — slide order{' — with p-cutoff' if 'with p-cutoff' in train_key else ''}"
     slide_out_path = f"../evaluation-results/iteration-0/pig_gait_v1Feb26-trainset95shuffle9/{out_base}{suffix}_slide_ticks.png"
     plot_grouped(
         train_slide,

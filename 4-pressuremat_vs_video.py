@@ -274,7 +274,7 @@ def plot_correlation(df, metric, output_dir=".", use_norm=False):
     clean_metric = metric.replace("_", " ").title()
     
     plt.xlabel(f"Pressure Mat {clean_metric}{unit_label}", fontsize=12)
-    plt.ylabel(f"Camera {clean_metric}{unit_label}", fontsize=12)
+    plt.ylabel(f"Video-based {clean_metric}{unit_label}", fontsize=12)
     
     title_text = f"Correlation: {clean_metric}"
     if use_norm:
@@ -286,10 +286,11 @@ def plot_correlation(df, metric, output_dir=".", use_norm=False):
     plt.yticks(fontsize=10)
     
     stats_res = compute_correlations(df, metric, use_norm)
-    txt = f"N={stats_res['N']}\nr={stats_res['Pearson r']:.2f}\nrho={stats_res['Spearman rho']:.2f}"
+    txt = f"$r = {stats_res['Pearson r']:.2f}$\n$\\rho = {stats_res['Spearman rho']:.2f}$"
     # Increased annotation font size
-    plt.annotate(txt, xy=(0.05, 0.82), xycoords='axes fraction', 
-                 bbox=dict(boxstyle="round,pad=0.5", fc="w", alpha=0.9, ec="gray"), fontsize=11)
+    plt.annotate(txt, xy=(0.05, 0.83), xycoords='axes fraction', 
+                 bbox=dict(boxstyle="round,pad=0.6,rounding_size=0.3", fc="white", ec="#444444", lw=1.2, alpha=0.95), 
+                 fontsize=14, linespacing=1.4)
     
     fname = f"scatter_{metric}_norm.png" if use_norm else f"scatter_{metric}.png"
     out_path = os.path.join(output_dir, fname)
@@ -684,18 +685,17 @@ def plot_combined_correlation(plot_data, ordered_metrics, output_dir):
             "stride_length": "Stride Length"
         }
         title = title_map.get(m, m)
-        if use_norm:
-            title += " (Norm)"
         
-        ax.set_xlabel(f"Pressure Mat{unit_label}", fontsize=13)
-        ax.set_ylabel(f"Camera{unit_label}", fontsize=13)
-        ax.set_title(title, fontsize=15, fontweight='bold')
+        ax.set_xlabel(f"Pressure Mat{unit_label}", fontsize=14)
+        ax.set_ylabel(f"Video-based{unit_label}", fontsize=14)
+        ax.set_title(title, fontsize=16, fontweight='bold')
         ax.grid(True, alpha=0.3)
-        ax.tick_params(axis='both', which='major', labelsize=11)
+        ax.tick_params(axis='both', which='major', labelsize=13)
         
-        txt = f"N={stats['N']}\nr={stats['Pearson r']:.2f}\nrho={stats['Spearman rho']:.2f}"
-        ax.annotate(txt, xy=(0.05, 0.82), xycoords='axes fraction', 
-                    bbox=dict(boxstyle="round,pad=0.5", fc="w", alpha=0.9, ec="gray"), fontsize=12)
+        txt = f"$r = {stats['Pearson r']:.2f}$\n$\\rho = {stats['Spearman rho']:.2f}$"
+        ax.annotate(txt, xy=(0.055, 0.88), xycoords='axes fraction', 
+                    bbox=dict(boxstyle="round,pad=0.6,rounding_size=0.3", fc="white", ec="#444444", lw=1.2, alpha=0.95), 
+                    fontsize=14, linespacing=1.4)
 
     plt.tight_layout()
     out_path = os.path.join(output_dir, "combined_correlation.png")

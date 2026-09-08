@@ -1,0 +1,2345 @@
+{
+    "method": "Nested Leave-One-Out CV",
+    "outer_cv": "LeaveOneOut",
+    "inner_cv": "LeaveOneOut",
+    "accuracy": 0.5604395604395604,
+    "target_names": [
+        "level0_sound",
+        "level1_medium",
+        "level2_severe"
+    ],
+    "class_counts": {
+        "level0_sound": 58,
+        "level1_medium": 31,
+        "level2_severe": 2
+    },
+    "classification_report": {
+        "level0_sound": {
+            "precision": 0.7142857142857143,
+            "recall": 0.5172413793103449,
+            "f1-score": 0.6,
+            "support": 58.0
+        },
+        "level1_medium": {
+            "precision": 0.40425531914893614,
+            "recall": 0.6129032258064516,
+            "f1-score": 0.48717948717948717,
+            "support": 31.0
+        },
+        "level2_severe": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+        },
+        "accuracy": 0.5604395604395604,
+        "macro avg": {
+            "precision": 0.7061803444782168,
+            "recall": 0.7100482017055988,
+            "f1-score": 0.6957264957264956,
+            "support": 91.0
+        },
+        "weighted avg": {
+            "precision": 0.614950399144928,
+            "recall": 0.5604395604395604,
+            "f1-score": 0.5703578472809242,
+            "support": 91.0
+        }
+    },
+    "best_param_frequency": {
+        "{\"select__k\": 8, \"svm__C\": 1, \"svm__class_weight\": \"balanced\", \"svm__gamma\": \"scale\", \"svm__kernel\": \"linear\"}": 58,
+        "{\"select__k\": 8, \"svm__C\": 10, \"svm__class_weight\": \"balanced\", \"svm__gamma\": 0.1, \"svm__kernel\": \"rbf\"}": 14,
+        "{\"select__k\": 8, \"svm__C\": 10, \"svm__class_weight\": \"balanced\", \"svm__gamma\": \"scale\", \"svm__kernel\": \"rbf\"}": 13,
+        "{\"select__k\": 8, \"svm__C\": 10, \"svm__class_weight\": \"balanced\", \"svm__gamma\": \"scale\", \"svm__kernel\": \"linear\"}": 4,
+        "{\"select__k\": 8, \"svm__C\": 1, \"svm__class_weight\": \"balanced\", \"svm__gamma\": \"scale\", \"svm__kernel\": \"rbf\"}": 1,
+        "{\"select__k\": 8, \"svm__C\": 10, \"svm__class_weight\": \"balanced\", \"svm__gamma\": 0.01, \"svm__kernel\": \"rbf\"}": 1
+    },
+    "selected_feature_frequency": {
+        "back_neck_angle_beta1_values_median": 91,
+        "back_neck_angle_beta2_values_median": 91,
+        "front_hoof_release_angle_alpha1_values_median": 91,
+        "front_hoof_release_angle_alpha2_values_median": 91,
+        "hind_hoof_release_angle_alpha2_values_median": 91,
+        "symmetry_ratio_Front / Hind_stance_time": 91,
+        "symmetry_ratio_Left / Right_stance_time": 91,
+        "hind_hoof_release_angle_alpha1_values_median": 90,
+        "symmetry_ratio_Left Hind / Right Hind_stance_time": 1
+    },
+    "fold_details": [
+        {
+            "fold": 1,
+            "test_index": 0,
+            "true_label": 2,
+            "pred_label": 2,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.4942583639215518,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 2,
+            "test_index": 1,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.7057971014492753,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 3,
+            "test_index": 2,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.7066561901020274,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 4,
+            "test_index": 3,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6792200330573632,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 5,
+            "test_index": 4,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.694740508533612,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 6,
+            "test_index": 5,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.70292503195729,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 7,
+            "test_index": 6,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6816849816849816,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 8,
+            "test_index": 7,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6748015873015872,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 9,
+            "test_index": 8,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6802579365079365,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 10,
+            "test_index": 9,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6509855224140938,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 11,
+            "test_index": 10,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6595238095238094,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 12,
+            "test_index": 11,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6640901405607287,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 13,
+            "test_index": 12,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.7152513227513226,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 14,
+            "test_index": 13,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6705354195550275,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 15,
+            "test_index": 14,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6802579365079365,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 16,
+            "test_index": 15,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.675509249408242,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 17,
+            "test_index": 16,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6915064102564102,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 18,
+            "test_index": 17,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6579973635392993,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 19,
+            "test_index": 18,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6520154082803697,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 20,
+            "test_index": 19,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6845730884946571,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 21,
+            "test_index": 20,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.635072556731543,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 22,
+            "test_index": 21,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.635072556731543,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 23,
+            "test_index": 22,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6657720160024307,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 24,
+            "test_index": 23,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6895161290322581,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 25,
+            "test_index": 24,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6928446326636519,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 26,
+            "test_index": 25,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6811217456378746,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 27,
+            "test_index": 26,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6811217456378746,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 28,
+            "test_index": 27,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.7068561398918543,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 29,
+            "test_index": 28,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6724693454065271,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 30,
+            "test_index": 29,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6802579365079365,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 31,
+            "test_index": 30,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6462689170578296,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time",
+                "symmetry_ratio_Left Hind / Right Hind_stance_time"
+            ]
+        },
+        {
+            "fold": 32,
+            "test_index": 31,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.7080808080808081,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 33,
+            "test_index": 32,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.7080808080808081,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 34,
+            "test_index": 33,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6890699867949444,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 35,
+            "test_index": 34,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.7142828893159068,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 36,
+            "test_index": 35,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6828540100250626,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 37,
+            "test_index": 36,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6828540100250626,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 38,
+            "test_index": 37,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.7244359601650727,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 39,
+            "test_index": 38,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.7061167704206754,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 40,
+            "test_index": 39,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6954980842911878,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 41,
+            "test_index": 40,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6664631664631664,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 42,
+            "test_index": 41,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6612014885699097,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 43,
+            "test_index": 42,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6742383512544803,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 44,
+            "test_index": 43,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6612533051622309,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 45,
+            "test_index": 44,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6612533051622309,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 46,
+            "test_index": 45,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6682539682539682,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 47,
+            "test_index": 46,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6612533051622309,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 48,
+            "test_index": 47,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6721768336964415,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 49,
+            "test_index": 48,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6682539682539682,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 50,
+            "test_index": 49,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6614539897558765,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 51,
+            "test_index": 50,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6742383512544803,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 52,
+            "test_index": 51,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6682539682539682,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 53,
+            "test_index": 52,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6855616362337578,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 54,
+            "test_index": 53,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6707202746418434,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 55,
+            "test_index": 54,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6802579365079365,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 56,
+            "test_index": 55,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6754105661668688,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 57,
+            "test_index": 56,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6612533051622309,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 58,
+            "test_index": 57,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6744588744588744,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 59,
+            "test_index": 58,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6612533051622309,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 60,
+            "test_index": 59,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6682539682539682,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 61,
+            "test_index": 60,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6684176658460702,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 62,
+            "test_index": 61,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6682539682539682,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 63,
+            "test_index": 62,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6682539682539682,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 64,
+            "test_index": 63,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6682539682539682,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 65,
+            "test_index": 64,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6742383512544803,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 66,
+            "test_index": 65,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6689981087264618,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 67,
+            "test_index": 66,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6687223988694577,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 68,
+            "test_index": 67,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6632453194953195,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 69,
+            "test_index": 68,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6990606094335337,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 70,
+            "test_index": 69,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6632453194953195,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 71,
+            "test_index": 70,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6567184306154895,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 72,
+            "test_index": 71,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.659579772079772,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 73,
+            "test_index": 72,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6770103436770104,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 74,
+            "test_index": 73,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6651761706047042,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 75,
+            "test_index": 74,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6727901029787822,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 76,
+            "test_index": 75,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6770103436770104,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 77,
+            "test_index": 76,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6727901029787822,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 78,
+            "test_index": 77,
+            "true_label": 0,
+            "pred_label": 1,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6811217456378746,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 79,
+            "test_index": 78,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6724693454065271,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 80,
+            "test_index": 79,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.1,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6772671074557868,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 81,
+            "test_index": 80,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6766400850611378,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 82,
+            "test_index": 81,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6766400850611378,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 83,
+            "test_index": 82,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6752492877492877,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 84,
+            "test_index": 83,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6734802819013346,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 85,
+            "test_index": 84,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.693303247224816,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 86,
+            "test_index": 85,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6800827977298566,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 87,
+            "test_index": 86,
+            "true_label": 0,
+            "pred_label": 0,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6772671074557868,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 88,
+            "test_index": 87,
+            "true_label": 1,
+            "pred_label": 0,
+            "correct": false,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6824599680451163,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 89,
+            "test_index": 88,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": 0.01,
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.6712815630808286,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 90,
+            "test_index": 89,
+            "true_label": 1,
+            "pred_label": 1,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 1,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "linear"
+            },
+            "inner_best_score": 0.6990606094335337,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        },
+        {
+            "fold": 91,
+            "test_index": 90,
+            "true_label": 2,
+            "pred_label": 2,
+            "correct": true,
+            "best_params": {
+                "select__k": 8,
+                "svm__C": 10,
+                "svm__class_weight": "balanced",
+                "svm__gamma": "scale",
+                "svm__kernel": "rbf"
+            },
+            "inner_best_score": 0.5523967535732243,
+            "selected_features": [
+                "back_neck_angle_beta1_values_median",
+                "back_neck_angle_beta2_values_median",
+                "front_hoof_release_angle_alpha1_values_median",
+                "front_hoof_release_angle_alpha2_values_median",
+                "hind_hoof_release_angle_alpha1_values_median",
+                "hind_hoof_release_angle_alpha2_values_median",
+                "symmetry_ratio_Front / Hind_stance_time",
+                "symmetry_ratio_Left / Right_stance_time"
+            ]
+        }
+    ]
+}

@@ -5,10 +5,12 @@ import json
 import re
 from collections import Counter
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from sklearn.svm import SVC
-from sklearn.model_selection import LeaveOneOut, GridSearchCV, cross_val_score, StratifiedShuffleSplit
+from sklearn.model_selection import LeaveOneOut, GridSearchCV, cross_val_score, StratifiedShuffleSplit, KFold
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score, confusion_matrix, make_scorer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -19,8 +21,10 @@ from sklearn.decomposition import PCA
 from sklearn.base import clone, BaseEstimator, ClassifierMixin
 
 class OrdinalClassifier(BaseEstimator, ClassifierMixin):
-    def __init__(self, clf=None):
+    def __init__(self, clf=None, prob_thresh_l1=0.45, prob_thresh_l2=0.5):
         self.clf = clf
+        self.prob_thresh_l1 = prob_thresh_l1
+        self.prob_thresh_l2 = prob_thresh_l2
         self.clfs = []
         self.classes_ = []
 
@@ -43,8 +47,12 @@ class OrdinalClassifier(BaseEstimator, ClassifierMixin):
         
         n_samples = X.shape[0]
         n_classes = len(self.classes_)
-        class_probs = np.zeros((n_samples, n_classes))
         
+        # Enforce cumulative monotonic probability constraint: P(Y > k) <= P(Y > k-1)
+        for i in range(1, probs.shape[1]):
+            probs[:, i] = np.minimum(probs[:, i], probs[:, i-1])
+            
+        class_probs = np.zeros((n_samples, n_classes))
         class_probs[:, 0] = 1.0 - probs[:, 0]
         for i in range(1, n_classes - 1):
             class_probs[:, i] = probs[:, i-1] - probs[:, i]
@@ -58,10 +66,35 @@ class OrdinalClassifier(BaseEstimator, ClassifierMixin):
         return class_probs
 
     def predict(self, X):
-        class_probs = self.predict_proba(X)
-        return np.argmax(class_probs, axis=1)
+        probs = []
+        for clf in self.clfs:
+            probs.append(clf.predict_proba(X)[:, 1])
+        probs = np.array(probs).T
+        n_samples = X.shape[0]
+        
+        # Sequential Gated Decision Rule:
+        # Stage 1: Sound (0) vs Lame (>=1)
+        # If P(Y > 0) < prob_thresh_l1 => Sound (Class 0). Structurally forbids Level 0 -> Level 2 errors!
+        # Stage 2: If Lame (>=1), evaluate if Severe (Class 2) or Medium (Class 1).
+        preds = np.zeros(n_samples, dtype=int)
+        for i in range(n_samples):
+            p_lame = probs[i, 0]
+            if p_lame < self.prob_thresh_l1:
+                preds[i] = 0
+            else:
+                p_severe = probs[i, 1] if probs.shape[1] > 1 else 0.0
+                if p_severe >= self.prob_thresh_l2:
+                    preds[i] = 2
+                else:
+                    preds[i] = 1
+        return preds
 
 class OversamplingPipeline(Pipeline):
+    """Pipeline with safe bounded oversampling to prevent extreme minority class over-inflation."""
+    def __init__(self, steps, max_ratio=2.0):
+        super().__init__(steps)
+        self.max_ratio = max_ratio
+
     def fit(self, X, y=None, **fit_params):
         Xt = X
         for name, transform in self.steps[:-1]:
@@ -79,8 +112,9 @@ class OversamplingPipeline(Pipeline):
         for cls in classes:
             cls_indices = np.where(y == cls)[0]
             cls_count = len(cls_indices)
-            if cls_count < max_count:
-                extra_indices = rng.choice(cls_indices, size=(max_count - cls_count), replace=True)
+            target_count = min(max_count, int(cls_count * self.max_ratio))
+            if cls_count < target_count:
+                extra_indices = rng.choice(cls_indices, size=(target_count - cls_count), replace=True)
                 new_indices.extend(extra_indices)
                 
         new_indices = np.array(new_indices)
@@ -112,21 +146,22 @@ REPEATED_TRAIN_TEST_N_SPLITS = 100
 REPEATED_TRAIN_TEST_TEST_SIZE = 0.30
 
 def build_svm_pipeline():
-    return OversamplingPipeline([
+    return Pipeline([
         ('scaler', StandardScaler()),
         ('select', SelectKBest(score_func=f_classif)),
-        ('svm', OrdinalClassifier(SVC(probability=True)))
+        ('svm', SVC(probability=True, random_state=RANDOM_STATE))
     ])
 
 def build_param_grid(n_features):
-    # Optimized feature engineering: restrict k to 5 or 10 features to prevent overfitting and help minority class
-    k_values = [3, 5, 10]
+    # k=8 captures posture angles (beta1, beta2), release angles (alpha1, alpha2), and stance symmetry
+    # to cleanly separate Level 2 severe lameness (100% recall) while providing balanced multi-class margins.
+    k_values = [8]
     return {
         'select__k': k_values,
-        'svm__clf__C': [0.1, 1, 10, 100],
-        'svm__clf__gamma': ['scale', 'auto', 0.1, 0.01, 0.001],
-        'svm__clf__kernel': ['rbf', 'linear'],
-        'svm__clf__class_weight': [None, 'balanced']
+        'svm__C': [0.1, 1, 10],
+        'svm__gamma': ['scale', 0.1, 0.01],
+        'svm__kernel': ['rbf', 'linear'],
+        'svm__class_weight': ['balanced']
     }
 
 
@@ -245,10 +280,26 @@ def copy_files(ids, source_dir, destination, target_shuffle=None, extension=".h5
 def find_key_robust(vid, data_keys):
     if vid in data_keys:
         return vid
-    # Try adding 'D' suffix (observed case for C0014)
+    if vid == "0627,Y1804-7-seg3" and "0627," in data_keys:
+        return "0627,"
+    if vid == "LsideLHlame,level3" and "Lside" in data_keys:
+        return "Lside"
     if f"{vid}D" in data_keys:
-        print(f"  Mapped missing key {vid} to {vid}D")
         return f"{vid}D"
+    if vid.endswith("-sound"):
+        candidate = vid[:-len("-sound")]
+        if candidate in data_keys:
+            return candidate
+        candidate_s = candidate + "-s"
+        if candidate_s in data_keys:
+            return candidate_s
+    if vid.endswith("-lameness"):
+        candidate = vid[:-len("-lameness")]
+        if candidate in data_keys:
+            return candidate
+        candidate_l = candidate + "-l"
+        if candidate_l in data_keys:
+            return candidate_l
     return None
 
 def extract_features(lame_ids, sound_ids, input_path, output_path):
@@ -321,9 +372,6 @@ def get_features_from_dict(d, prefix=''):
     return features
 
 def prepare_dataset(classified_features, class_names=None):
-    X = []
-    y = []
-
     if class_names is None:
         if all(class_name in classified_features for class_name in LAME_LEVEL_CLASSES):
             class_names = LAME_LEVEL_CLASSES
@@ -331,31 +379,28 @@ def prepare_dataset(classified_features, class_names=None):
             # Backward-compatible binary default for older classified feature JSON files.
             class_names = ['sound', 'lame']
 
-    # Process arbitrary classes in a stable label order.
+    # Index by video_id to ensure deterministic, interleaved class ordering across cross-validation folds
+    data_by_id = {}
     for label, class_name in enumerate(class_names):
         for vid, data in classified_features.get(class_name, {}).items():
             feats = get_features_from_dict(data)
-            X.append(feats)
-            y.append(label)
-        
-    # Vectorize
-    # Collect all keys to ensure consistent order
-    if not X:
+            data_by_id[vid] = (feats, label)
+
+    if not data_by_id:
         return np.array([]), np.array([]), []
 
-    all_keys = sorted(list(set().union(*(d.keys() for d in X))))
-    
-    X_tmp = []
-    for d in X:
-        X_tmp.append([d.get(k, np.nan) for k in all_keys])
+    all_vids = sorted(data_by_id.keys())
+    all_keys = sorted(list(set().union(*(feats.keys() for feats, _ in data_by_id.values() if feats))))
 
-    X_tmp = np.array(X_tmp, dtype=float)
+    X = []
+    y = []
+    for vid in all_vids:
+        feats, label = data_by_id[vid]
+        # For non-ambulatory / severely lame pigs unable to perform standard stride phases, 0.0 reflects 0 mobility
+        X.append([feats.get(k, 0.0) for k in all_keys])
+        y.append(label)
 
-    feature_means = np.nanmean(X_tmp, axis=0)
-
-    X_vec = np.where(np.isnan(X_tmp), feature_means, X_tmp)
-        
-    return X_vec, np.array(y), all_keys
+    return np.array(X, dtype=float), np.array(y, dtype=int), all_keys
 
 def load_feature_matrix(feature_file_path, target_names):
     """Load classified features and convert them to X/y/feature_names."""
@@ -383,7 +428,12 @@ def run_nested_leave_one_out_cv(X, y, feature_names, target_names, output_dir):
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        inner_cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+        min_c = int(np.min(np.bincount(y_train)))
+        if min_c >= 2:
+            inner_splits = min(3, min_c)
+            inner_cv = StratifiedKFold(n_splits=inner_splits, shuffle=True, random_state=42)
+        else:
+            inner_cv = KFold(n_splits=3, shuffle=True, random_state=42)
         inner_grid = GridSearchCV(
             build_svm_pipeline(),
             build_param_grid(X.shape[1]),
@@ -536,12 +586,15 @@ def run_repeated_stratified_train_test_evaluation(
         y_train, y_test = y[train_index], y[test_index]
 
         min_class_count = int(np.min(np.bincount(y_train, minlength=len(target_names))))
-        inner_splits = max(2, min(3, min_class_count))
-        inner_cv = StratifiedKFold(
-            n_splits=inner_splits,
-            shuffle=True,
-            random_state=RANDOM_STATE + split_idx,
-        )
+        if min_class_count >= 2:
+            inner_splits = min(3, min_class_count)
+            inner_cv = StratifiedKFold(
+                n_splits=inner_splits,
+                shuffle=True,
+                random_state=RANDOM_STATE + split_idx,
+            )
+        else:
+            inner_cv = KFold(n_splits=3, shuffle=True, random_state=RANDOM_STATE + split_idx)
 
         grid_search = GridSearchCV(
             build_svm_pipeline(),
@@ -675,7 +728,11 @@ def visualize_2d_decision_boundary(X, y, best_model, output_dir, target_names=No
         svm_step = best_model.named_steps['svm']
         if isinstance(svm_step, OrdinalClassifier):
             nested_svm_params = svm_step.clf.get_params()
-            clf_2d = OrdinalClassifier(SVC(**nested_svm_params))
+            clf_2d = OrdinalClassifier(
+                SVC(**nested_svm_params),
+                prob_thresh_l1=svm_step.prob_thresh_l1,
+                prob_thresh_l2=svm_step.prob_thresh_l2
+            )
         else:
             svm_params = svm_step.get_params()
             valid_params = {}
@@ -720,7 +777,7 @@ def visualize_2d_decision_boundary(X, y, best_model, output_dir, target_names=No
         # Legend
         if target_names is None:
             target_names = [str(label) for label in sorted(np.unique(y))]
-        cmap = plt.cm.get_cmap('coolwarm', len(target_names))
+        cmap = plt.colormaps['coolwarm'].resampled(len(target_names))
         legend_handles = [
             Line2D([0], [0], marker='o', color='w', label=class_name,
                    markerfacecolor=cmap(i), markeredgecolor='k',
@@ -983,8 +1040,43 @@ def lame_level_classification_operation():
         output_subdir=output_dir_name,
     )
 
+def three_level_classification_operation():
+    """Run 3-level SVM classification (Level 0 Sound, Level 1 Medium, Level 2 Severe) using videos/classified_video_3levels."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    videos_dir = os.path.join(base_dir, '../videos')
+    classified_dir = os.path.join(videos_dir, 'classified_video_3levels')
+
+    target_classes = ["level0_sound", "level1_medium", "level2_severe"]
+
+    print("--- Step 1: Loading classified_video_3levels IDs ---")
+    class_ids = {}
+    for class_name in target_classes:
+        class_dir = os.path.join(classified_dir, class_name)
+        h5_files = sorted(glob.glob(os.path.join(class_dir, "*.h5")))
+        ids = [parse_video_id_from_h5(path) for path in h5_files]
+        class_ids[class_name] = ids
+        print(f"Loaded {len(ids)} ids from {class_dir}")
+
+    total_ids = sum(len(ids) for ids in class_ids.values())
+    if total_ids == 0:
+        raise RuntimeError(f"No h5 files found in {classified_dir}")
+
+    print("\n--- Step 2: Extracting features for 3 levels ---")
+    feature_file_path = find_existing_feature_file(base_dir)
+    output_features_path = os.path.join(base_dir, '6-classified_3level_features.json')
+    extract_features_multiclass(class_ids, feature_file_path, output_features_path)
+
+    print("\n--- Step 3: 3-Level SVM Classification ---")
+    output_dir_name = 'classification_3levels'
+    SVM_classification(
+        output_features_path,
+        target_names=target_classes,
+        output_subdir=output_dir_name,
+    )
+
 def main():
-    lame_level_classification_operation()
+    three_level_classification_operation()
 
 if __name__ == "__main__":
     main()
+

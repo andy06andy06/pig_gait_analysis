@@ -1,4 +1,186 @@
 {
+  "0627,": {
+    "BL": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "BR": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "FL": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "FR": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "back_height_feature": {
+      "H": {
+        "frames": [],
+        "legs": [],
+        "unit": "pixels",
+        "values": []
+      }
+    },
+    "back_neck_angle": {
+      "beta1": {
+        "frames": [],
+        "legs": [],
+        "unit": "deg",
+        "values": []
+      },
+      "beta2": {
+        "frames": [],
+        "legs": [],
+        "unit": "deg",
+        "values": []
+      }
+    },
+    "front_hoof_release_angle": {
+      "alpha1": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha1_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "leg": null
+    },
+    "head_bobbing": {
+      "head_y_amp": {
+        "unit": "pixels",
+        "values": []
+      },
+      "head_y_sd": {
+        "unit": "pixels",
+        "values": []
+      }
+    },
+    "hind_hoof_release_angle": {
+      "alpha1": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha1_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "leg": null
+    },
+    "symmetry_ratio": {
+      "Front / Hind": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
+      },
+      "Left / Right": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
+      },
+      "Left Front / Right Front": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
+      },
+      "Left Hind / Right Hind": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
+      }
+    }
+  },
   "1118004": {
     "BL": {
       "duty_factor": {
@@ -33899,6 +34081,188 @@
         "stance_time": 1.01,
         "stride_length": 0.99,
         "stride_time": 0.99
+      }
+    }
+  },
+  "Lside": {
+    "BL": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "BR": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "FL": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "FR": {
+      "duty_factor": {
+        "unit": "ratio",
+        "values": []
+      },
+      "normalized_stride_length": {
+        "unit": "ratio",
+        "values": []
+      },
+      "stance_time": {
+        "unit": "s",
+        "values": []
+      },
+      "stride_length": {
+        "unit": "pixels",
+        "values": []
+      },
+      "stride_time": {
+        "unit": "s",
+        "values": []
+      }
+    },
+    "back_height_feature": {
+      "H": {
+        "frames": [],
+        "legs": [],
+        "unit": "pixels",
+        "values": []
+      }
+    },
+    "back_neck_angle": {
+      "beta1": {
+        "frames": [],
+        "legs": [],
+        "unit": "deg",
+        "values": []
+      },
+      "beta2": {
+        "frames": [],
+        "legs": [],
+        "unit": "deg",
+        "values": []
+      }
+    },
+    "front_hoof_release_angle": {
+      "alpha1": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha1_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "leg": null
+    },
+    "head_bobbing": {
+      "head_y_amp": {
+        "unit": "pixels",
+        "values": []
+      },
+      "head_y_sd": {
+        "unit": "pixels",
+        "values": []
+      }
+    },
+    "hind_hoof_release_angle": {
+      "alpha1": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha1_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2": {
+        "unit": "deg",
+        "values": []
+      },
+      "alpha2_rom": {
+        "unit": "deg",
+        "values": []
+      },
+      "leg": null
+    },
+    "symmetry_ratio": {
+      "Front / Hind": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
+      },
+      "Left / Right": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
+      },
+      "Left Front / Right Front": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
+      },
+      "Left Hind / Right Hind": {
+        "stance_time": null,
+        "stride_length": null,
+        "stride_time": null
       }
     }
   }

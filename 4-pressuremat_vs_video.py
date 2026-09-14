@@ -7,6 +7,10 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 import re
 
+# Spatial Calibration Factor: 1.7546 mm/pixel -> 0.17546 cm/pixel
+SCALE_MM_PER_PIXEL = 1.7546
+SCALE_CM_PER_PIXEL = SCALE_MM_PER_PIXEL / 10.0  # 0.17546 cm/pixel
+
 # =============================================================================
 # 1. DATA LOADING & MATCHING
 # =============================================================================
@@ -140,7 +144,11 @@ def build_analysis_dataframe(mat_data_map, cam_data_map):
                     # Filter None if any, though usually lists are numbers
                     vals = [v for v in vals if v is not None]
                     if len(vals) > 0:
-                        row[f"cam_{key}"] = np.mean(vals)
+                        val = np.mean(vals)
+                        # Convert camera stride_length from pixels to physical cm
+                        if key == "stride_length":
+                            val = val * SCALE_CM_PER_PIXEL
+                        row[f"cam_{key}"] = val
                     else:
                         row[f"cam_{key}"] = None
                 else:
@@ -646,7 +654,13 @@ def compute_icc_2_1(df, metric, use_norm=False):
     }
 
 def plot_combined_correlation(plot_data, ordered_metrics, output_dir):
-    fig, axes = plt.subplots(1, 3, figsize=(20, 7)) # Increased figure size
+    fig, axes = plt.subplots(1, 3, figsize=(20, 7), dpi=200) # Increased figure size
+    
+    title_map = {
+        "stance_time": "Stance Time (s)",
+        "stride_time": "Stride Time (s)",
+        "stride_length": "Stride Length (cm)"
+    }
     
     for i, m in enumerate(ordered_metrics):
         ax = axes[i]
@@ -658,6 +672,7 @@ def plot_combined_correlation(plot_data, ordered_metrics, output_dir):
         df = data["df"]
         use_norm = data["use_norm"]
         stats = data["stats_corr"]
+        stats_err = data.get("stats_err", {})
         
         suffix = "_norm" if use_norm else ""
         col_mat = f"mat_{m}{suffix}"
@@ -666,40 +681,54 @@ def plot_combined_correlation(plot_data, ordered_metrics, output_dir):
         x = df[col_mat]
         y = df[col_cam]
         
-        # Increased marker size
-        ax.scatter(x, y, s=60, alpha=0.7, edgecolors='w', linewidth=0.8)
+        # Scatter points
+        ax.scatter(x, y, s=70, alpha=0.7, edgecolors='w', linewidth=0.8)
         
         # y=x line
         if len(x) > 0:
             min_val = min(x.min(), y.min())
             max_val = max(x.max(), y.max())
             pad = (max_val - min_val) * 0.05
-            ax.plot([min_val-pad, max_val+pad], [min_val-pad, max_val+pad], 'k--', alpha=0.6, linewidth=1.5)
+            ax.plot([min_val-pad, max_val+pad], [min_val-pad, max_val+pad], 'k--', alpha=0.6, linewidth=1.8)
         
         unit_label = get_metric_unit_label(m, use_norm)
         
-        # Clean up metric name for title
-        title_map = {
-            "stance_time": "Stance Time",
-            "stride_time": "Stride Time",
-            "stride_length": "Stride Length"
-        }
         title = title_map.get(m, m)
+        if use_norm:
+            title += " (Norm)"
         
-        ax.set_xlabel(f"Pressure Mat{unit_label}", fontsize=14)
-        ax.set_ylabel(f"Video-based{unit_label}", fontsize=14)
-        ax.set_title(title, fontsize=16, fontweight='bold')
+        ax.set_xlabel("Pressure Mat", fontsize=18)
+        ax.set_title(title, fontsize=20, fontweight='bold', pad=12)
         ax.grid(True, alpha=0.3)
-        ax.tick_params(axis='both', which='major', labelsize=13)
+        ax.tick_params(axis='both', which='major', labelsize=15)
         
-        txt = f"$r = {stats['Pearson r']:.2f}$\n$\\rho = {stats['Spearman rho']:.2f}$"
-        ax.annotate(txt, xy=(0.055, 0.88), xycoords='axes fraction', 
-                    bbox=dict(boxstyle="round,pad=0.6,rounding_size=0.3", fc="white", ec="#444444", lw=1.2, alpha=0.95), 
-                    fontsize=14, linespacing=1.4)
+        # Enlarge legend/annotation box with RMSE and unit
+        if use_norm:
+            rmse_unit = ""
+        elif "time" in m:
+            rmse_unit = " s"
+        elif "length" in m:
+            rmse_unit = " cm"
+        else:
+            rmse_unit = ""
 
-    plt.tight_layout()
+        rmse_val = stats_err.get("RMSE", None)
+        if rmse_val is not None:
+            txt = f"$r = {stats['Pearson r']:.2f}$\n$\\rho = {stats['Spearman rho']:.2f}$\nRMSE = {rmse_val:.2f}{rmse_unit}"
+        else:
+            txt = f"$r = {stats['Pearson r']:.2f}$\n$\\rho = {stats['Spearman rho']:.2f}$"
+
+        ax.annotate(txt, xy=(0.05, 0.94), xycoords='axes fraction', va='top',
+                    bbox=dict(boxstyle="round,pad=0.7,rounding_size=0.3", fc="white", ec="#333333", lw=1.3, alpha=0.95), 
+                    fontsize=18, linespacing=1.4)
+
+    # Combined Y-axis label placed on the far left (fontweight normal as requested)
+    fig.supylabel("Video-based", fontsize=20, fontweight='normal', x=0.012)
+
+    plt.tight_layout(rect=[0.025, 0, 1, 1])
     out_path = os.path.join(output_dir, "combined_correlation.png")
-    plt.savefig(out_path, dpi=150)
+    plt.savefig(out_path, dpi=200)
+    plt.savefig(out_path.replace(".png", ".pdf"))
     plt.close()
     print(f"Saved combined correlation plot to {out_path}")
 
@@ -806,13 +835,9 @@ def run_full_validation():
             continue
         
         # Decide if we normalize
-        # If stride_length, we use normalization (Z-score)
+        # With spatial calibration (1.7546 mm/pixel = 0.17546 cm/pixel), 
+        # both camera and pressure mat stride lengths are measured in cm.
         use_norm = False
-        if m == "stride_length":
-            use_norm = True
-            # Apply normalization
-            sub_df[f"mat_{m}_norm"] = normalize_series(sub_df[f"mat_{m}"], method='zscore')
-            sub_df[f"cam_{m}_norm"] = normalize_series(sub_df[f"cam_{m}"], method='zscore')
             
         # Correlations
         c_res = compute_correlations(sub_df, m, use_norm=use_norm)
@@ -830,13 +855,6 @@ def run_full_validation():
         })
         plot_bland_altman(sub_df, m, output_dir, use_norm=use_norm)
         
-        plot_data[m] = {
-            "df": sub_df,
-            "use_norm": use_norm,
-            "stats_corr": c_res,
-            "stats_ba": ba_res
-        }
-        
         # ICC
         icc_res = compute_icc_2_1(sub_df, m, use_norm=use_norm)
         icc_results.append(icc_res)
@@ -844,6 +862,14 @@ def run_full_validation():
         # Error Metrics (RMSE, MAE)
         err_res = compute_error_metrics(sub_df, m, use_norm=use_norm)
         error_results.append(err_res)
+        
+        plot_data[m] = {
+            "df": sub_df,
+            "use_norm": use_norm,
+            "stats_corr": c_res,
+            "stats_ba": ba_res,
+            "stats_err": err_res
+        }
 
     # Plot combined absolute
     ordered_metrics = ["stance_time", "stride_time", "stride_length"]

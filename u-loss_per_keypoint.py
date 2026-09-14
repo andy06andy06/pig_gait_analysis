@@ -58,7 +58,7 @@ def plot_grouped(train_vals, test_vals, bodyparts, title, out_path, xtick_labels
     color_test = cmap(5)   # Red-ish
 
     plt.figure(figsize=(12,6))
-    bars_train = plt.bar(x - width/2, train_vals, width, label="Train error", color=color_train)
+    bars_train = plt.bar(x - width/2, train_vals, width, label="Training error", color=color_train)
     bars_test  = plt.bar(x + width/2, test_vals, width, label="Test error", color=color_test)
 
     plt.xticks(x, labels, rotation=xtick_rotation, ha=xtick_ha)
